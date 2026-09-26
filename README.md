@@ -1,3 +1,4 @@
+
 # Welcome to your Expo app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
@@ -54,3 +55,23 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+=======
+# EventU - Aplicación Móvil
+
+Aplicación Móvil orientada a los **Estudiantes** de la plataforma **EventU**.
+
+## Funcionalidades Principales
+* Registro de usuario y autenticación de estudiantes.
+* Exploración, búsqueda y filtrado de eventos institucionales disponibles.
+* Inscripción a eventos con control automático de cupos máximos.
+* Generación y visualización del código QR de acceso para cada inscripción activa.
+* Historial de eventos e inscripciones realizadas.
+
+## 🛠️ Configuración Local
+
+### Variables de Entorno (`.env`)
+Crea un archivo `.env` en la raíz del proyecto para conectar con el backend:
+
+```env
+API_URL=(por definir)
+
