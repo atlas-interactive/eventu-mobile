@@ -1,19 +1,6 @@
-import {api} from '@/api/client';
-import type {
-    LoginRequest,
-    LoginResponse,
-    RegistroRequest,
-    RegistroResponse,
-} from '@/types/auth'
+import { api } from '@/api/client';
+import type { LoginRequestDTO, LoginResponse } from '@/types/auth';
 
-export const login = (data: LoginRequest) =>
-    api<LoginResponse>('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify(data),
-    });
-
-export const registro = (data: RegistroRequest) =>
-    api<RegistroResponse>('/auth/registro', {
-        method: 'POST',
-        body: JSON.stringify(data),
-    });
+// Inicia sesión con correo y contraseña
+export const login = (data: LoginRequestDTO) =>
+    api.post<LoginResponse>('/auth/login', data).then((response) => response.data);

@@ -1,8 +1,10 @@
-export interface LoginRequest {
+// Datos que se envían al backend para iniciar sesión
+export interface LoginRequestDTO {
     correo: string;
     password: string;
 }
 
+// Respuesta del backend cuando el login es exitoso
 export interface LoginResponse {
     token: string;
     usuarioId: number;
@@ -10,17 +12,3 @@ export interface LoginResponse {
     correo: string;
     rol: string;
 }
-
-export interface RegistroRequest {
-    nombre: string;
-    correo: string;
-    password: string;
-}
-
-export interface RegistroResponse {
-    mensaje: string;
-    usuarioId: number;
-    correo: string;
-    rol: string;
-}
-
