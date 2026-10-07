@@ -1,4 +1,3 @@
-import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
     ActivityIndicator,
@@ -21,7 +20,6 @@ import { login } from '@/services/authService';
 
 export default function LoginScreen() {
     const theme = useTheme();
-    const router = useRouter();
     const { iniciarSesion } = useAuth();
 
     const [correo, setCorreo] = useState('');
@@ -40,7 +38,6 @@ export default function LoginScreen() {
         try {
             const datos = await login({ correo: correo.trim(), password });
             await iniciarSesion(datos);
-            router.replace('/');
         } catch (e) {
             setError(e instanceof Error ? e.message : 'No se pudo iniciar sesión.');
         } finally {
