@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
 import { CLAVE_SESION } from '@/constants/session';
@@ -19,3 +19,23 @@ api.interceptors.request.use(async (config) => {
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
 });
+
+type ManejadorSesionExpirada = () => void;
+let alExpirarSesion: ManejadorSesionExpirada | null = null;
+
+// El AuthProvider registra aquí qué hacer cuando el backend rechaza el token
+export const registrarSesionExpirada = (manejador: ManejadorSesionExpirada | null) => {
+    alExpirarSesion = manejador;
+};
+
+// Un 401 en una petición que llevaba token significa que la sesión venció o dejó de ser válida
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        if (isAxiosError(error) && error.response?.status === 401 && error.config?.headers?.Authorization) {
+            await SecureStore.deleteItemAsync(CLAVE_SESION);
+            alExpirarSesion?.();
+        }
+        return Promise.reject(error);
+    },
+);
