@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { mensajeDeError } from '@/api/mensajeDeError';
+
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
@@ -39,7 +41,7 @@ export default function LoginScreen() {
             const datos = await login({ correo: correo.trim(), password });
             await iniciarSesion(datos);
         } catch (e) {
-            setError(e instanceof Error ? e.message : 'No se pudo iniciar sesión.');
+            setError(mensajeDeError(e));
         } finally {
             setLoading(false);
         }
