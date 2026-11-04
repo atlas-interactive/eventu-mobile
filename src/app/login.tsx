@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { useState } from 'react';
 import {
     ActivityIndicator,
@@ -61,6 +62,12 @@ export default function LoginScreen() {
                     <ScrollView
                         contentContainerStyle={styles.container}
                         keyboardShouldPersistTaps="handled">
+                        <Image
+                            source={require('@/assets/images/iconoEventU.png')}
+                            style={styles.logo}
+                            contentFit="contain"
+                            accessible={false}
+                        />
                         <ThemedText type="subtitle" style={[styles.loraBold, styles.centered]}>
                             EventU
                         </ThemedText>
@@ -146,6 +153,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
     flex: { flex: 1 },
+    logo: { width: 36, height: 36, alignSelf: 'center' },
     field: { gap: Spacing.two },
     centered: { textAlign: 'center' },
     loraBold: { fontFamily: 'Lora_700Bold' },

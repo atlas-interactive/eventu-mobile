@@ -3,18 +3,19 @@ export interface Evento {
     id: number;
     titulo: string;
     descripcion: string;
+    // LocalDateTime sin zona horaria, por ejemplo "2026-10-20T14:30:00"
     fechaInicio: string;
     ubicacion: string;
-    cupoMaximos: number;
+    cuposMaximos: number;
     cuposDisponibles: number;
     estado: string;
     organizadorId: number;
-    orfanizadorNombre: string;
+    organizadorNombre: string;
     categoriaId: number;
     categoriaNombre: string;
 }
 
-export interface FiltroEvent0 {
+export interface FiltrosEvento {
     categoriaId?: number;
     fechaDesde?: string;
     fechaHasta?: string;
