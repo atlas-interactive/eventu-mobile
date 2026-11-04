@@ -40,7 +40,7 @@ function NavegacionRaiz() {
                     <Stack.Screen name="login" />
                 </Stack.Protected>
             </Stack>
-            {/* El splash se oculta solo después de leer la sesión, para que no se alcance a ver el login */}
+            {/* El splash se oculta solo despues de leer la sesion para que no se alcance a ver el login */}
             {!loading && <AnimatedSplashOverlay />}
         </>
     );
