@@ -18,7 +18,7 @@ import { ThemedView } from '@/components/themed-view';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { useTheme } from '@/hooks/use-theme';
-import { login } from '@/services/authService';
+import { login } from '@/features/auth/services/auth-service';
 
 export default function LoginScreen() {
     const theme = useTheme();
