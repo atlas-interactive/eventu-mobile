@@ -20,6 +20,7 @@ import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { useTheme } from '@/hooks/use-theme';
 import { login } from '@/features/auth/services/auth-service';
+import { esAdministrador } from '@/features/sesion/sesion';
 
 export default function LoginScreen() {
     const theme = useTheme();
@@ -40,6 +41,10 @@ export default function LoginScreen() {
         setLoading(true);
         try {
             const datos = await login({ correo: correo.trim(), password });
+            if (esAdministrador(datos)) {
+                setError('Esta app es para estudiantes y organizadores. Ingresa desde el panel web de EventU.');
+                return;
+            }
             await iniciarSesion(datos);
         } catch (e) {
             setError(mensajeDeError(e));
