@@ -14,6 +14,10 @@ export default function AppTabs() {
                 <NativeTabs.Trigger.Label>Eventos</NativeTabs.Trigger.Label>
                 <NativeTabs.Trigger.Icon sf="calendar" md="event" />
             </NativeTabs.Trigger>
+            <NativeTabs.Trigger name="perfil">
+                <NativeTabs.Trigger.Label>Perfil</NativeTabs.Trigger.Label>
+                <NativeTabs.Trigger.Icon sf="person.crop.circle" md="person" />
+            </NativeTabs.Trigger>
             <NativeTabs.Trigger name="index" hidden />
         </NativeTabs>
     );
