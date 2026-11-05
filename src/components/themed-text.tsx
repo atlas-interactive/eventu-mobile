@@ -32,35 +32,37 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
 
 const styles = StyleSheet.create({
     small: {
+        fontFamily: 'AtkinsonHyperlegible_400Regular',
         fontSize: 14,
         lineHeight: 20,
-        fontWeight: 500,
     },
     smallBold: {
+        fontFamily: 'AtkinsonHyperlegible_700Bold',
         fontSize: 14,
         lineHeight: 20,
-        fontWeight: 700,
     },
     default: {
+        fontFamily: 'AtkinsonHyperlegible_400Regular',
         fontSize: 16,
         lineHeight: 24,
-        fontWeight: 500,
     },
     title: {
+        fontFamily: 'AtkinsonHyperlegible_700Bold',
         fontSize: 48,
-        fontWeight: 600,
         lineHeight: 52,
     },
     subtitle: {
+        fontFamily: 'AtkinsonHyperlegible_700Bold',
         fontSize: 32,
         lineHeight: 44,
-        fontWeight: 600,
     },
     link: {
+        fontFamily: 'AtkinsonHyperlegible_400Regular',
         lineHeight: 30,
         fontSize: 14,
     },
     linkPrimary: {
+        fontFamily: 'AtkinsonHyperlegible_700Bold',
         lineHeight: 30,
         fontSize: 14,
     },

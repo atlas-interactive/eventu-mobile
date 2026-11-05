@@ -1,4 +1,8 @@
-import { Lora_400Regular, Lora_700Bold, useFonts } from '@expo-google-fonts/lora';
+import {
+    AtkinsonHyperlegible_400Regular,
+    AtkinsonHyperlegible_700Bold,
+    useFonts,
+} from '@expo-google-fonts/atkinson-hyperlegible';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme } from 'react-native';
@@ -11,7 +15,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
     const colorScheme = useColorScheme();
-    const [fontsLoaded] = useFonts({ Lora_400Regular, Lora_700Bold });
+    const [fontsLoaded] = useFonts({ AtkinsonHyperlegible_400Regular, AtkinsonHyperlegible_700Bold });
 
     // Espera a que carguen las fuentes antes de mostrar la app
     if (!fontsLoaded) return null;
