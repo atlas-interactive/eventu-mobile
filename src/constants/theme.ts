@@ -13,6 +13,7 @@ export const Colors = {
         onPrimary: '#ffffff',
         link: '#b3141f',
         error: '#C62828',
+        border: '#e4e3de',
     },
     dark: {
         text: '#ffffff',
@@ -24,6 +25,7 @@ export const Colors = {
         onPrimary: '#ffffff',
         link: '#FF6B6B',
         error: '#FF6B6B',
+        border: '#2E3135',
     },
 } as const;
 
