@@ -16,6 +16,7 @@ import { mensajeDeError } from '@/api/mensajeDeError';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { IconoAviso } from '@/components/ui/icono-aviso';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { useTheme } from '@/hooks/use-theme';
@@ -73,15 +74,15 @@ export default function LoginScreen() {
                             contentFit="contain"
                             accessible={false}
                         />
-                        <ThemedText type="subtitle" style={[styles.loraBold, styles.centered]}>
+                        <ThemedText type="subtitle" style={styles.centered}>
                             EventU
                         </ThemedText>
-                        <ThemedText type="subtitle" style={[styles.loraBold, styles.centered]}>
+                        <ThemedText type="subtitle" style={styles.centered}>
                             Inicia sesión
                         </ThemedText>
                         <ThemedText
                             themeColor="textSecondary"
-                            style={[styles.loraBold, styles.centered]}>
+                            style={styles.centered}>
                             Ingresa con tu correo institucional
                         </ThemedText>
 
@@ -122,12 +123,18 @@ export default function LoginScreen() {
                         </View>
 
                         {error && (
-                            <ThemedText
-                                themeColor="error"
+                            <View
                                 accessibilityRole="alert"
-                                accessibilityLiveRegion="polite">
-                                {error}
-                            </ThemedText>
+                                accessibilityLiveRegion="polite"
+                                style={[
+                                    styles.alertaError,
+                                    { backgroundColor: theme.errorBackground, borderColor: theme.softRedBackground },
+                                ]}>
+                                <IconoAviso tipo="error" style={styles.iconoAlerta} />
+                                <ThemedText type="small" themeColor="error" style={styles.textoAlerta}>
+                                    {error}
+                                </ThemedText>
+                            </View>
                         )}
 
                         <Pressable
@@ -158,10 +165,19 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
     flex: { flex: 1 },
-    logo: { width: 36, height: 36, alignSelf: 'center' },
+    logo: { width: 42, height: 41, alignSelf: 'center' },
     field: { gap: Spacing.two },
     centered: { textAlign: 'center' },
-    loraBold: { fontFamily: 'Lora_700Bold' },
+    alertaError: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: Spacing.two,
+        borderWidth: 1,
+        borderRadius: 4,
+        padding: Spacing.two,
+    },
+    iconoAlerta: { marginTop: 2 },
+    textoAlerta: { flex: 1 },
     container: {
         flexGrow: 1,
         justifyContent: 'center',
