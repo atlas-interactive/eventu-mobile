@@ -98,7 +98,7 @@ export function FiltroFechas({ fechaDesde, fechaHasta, onCerrar, onAplicar }: Fi
 
     return (
         <Modal transparent animationType="slide" onRequestClose={onCerrar}>
-            <View style={styles.fondo}>
+            <View style={[styles.flex, { backgroundColor: theme.overlay }]}>
                 <Pressable style={styles.flex} accessibilityLabel="Cerrar filtro de fechas" onPress={onCerrar} />
                 <View
                     style={[
@@ -154,7 +154,6 @@ export function FiltroFechas({ fechaDesde, fechaHasta, onCerrar, onAplicar }: Fi
 
 const styles = StyleSheet.create({
     flex: { flex: 1 },
-    fondo: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.4)' },
     panel: {
         gap: Spacing.three,
         borderTopLeftRadius: 16,
