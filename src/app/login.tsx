@@ -3,7 +3,6 @@ import { useState } from 'react';
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
-    Platform,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -64,7 +63,7 @@ export default function LoginScreen() {
             <SafeAreaView style={styles.flex}>
                 <KeyboardAvoidingView
                     style={styles.flex}
-                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+                    behavior="padding">
                     <ScrollView
                         contentContainerStyle={styles.container}
                         keyboardShouldPersistTaps="handled">
