@@ -25,6 +25,8 @@ export const Colors = {
         deportiveOrangeBackground: '#fff3e0',
         culturalPurple: '#5b21b6',
         culturalPurpleBackground: '#f5f3ff',
+        agotado: '#8a4b08',
+        agotadoBackground: '#fff4e5',
         overlay: 'rgba(0, 0, 0, 0.4)',
     },
     dark: {
@@ -49,6 +51,8 @@ export const Colors = {
         deportiveOrangeBackground: '#3b1d06',
         culturalPurple: '#c4b5fd',
         culturalPurpleBackground: '#2e1065',
+        agotado: '#fdba74',
+        agotadoBackground: '#3b1d06',
         overlay: 'rgba(0, 0, 0, 0.6)',
     },
 } as const;
