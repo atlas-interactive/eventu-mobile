@@ -1,6 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
+import { registrarSesionExpirada } from '@/api/client';
 import type { LoginResponse } from '@/types/auth';
 import { CLAVE_SESION } from '@/constants/session';
 
@@ -25,6 +26,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             })
             .catch(() => {})
             .finally(() => setLoading(false));
+    }, []);
+
+    // Si el backend rechaza el token, se limpia la sesión y la app vuelve al login
+    useEffect(() => {
+        registrarSesionExpirada(() => setUsuario(null));
+        return () => registrarSesionExpirada(null);
     }, []);
 
     // Guarda la sesión en el teléfono y en memoria tras un login exitoso

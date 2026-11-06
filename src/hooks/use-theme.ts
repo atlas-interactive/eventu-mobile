@@ -1,12 +1,12 @@
 /**
- * Learn more about light and dark modes:
- * https://docs.expo.dev/guides/color-schemes/
- */
+* Learn more about light and dark modes:
+* https://docs.expo.dev/guides/color-schemes/
+*/
 
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export function useTheme() {
-  const scheme = useColorScheme();
-  return Colors[scheme === 'dark' ? 'dark' : 'light'];
+    const scheme = useColorScheme();
+    return Colors[scheme === 'dark' ? 'dark' : 'light'];
 }

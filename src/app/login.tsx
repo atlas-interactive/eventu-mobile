@@ -1,8 +1,8 @@
+import { Image } from 'expo-image';
 import { useState } from 'react';
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
-    Platform,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -11,12 +11,16 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { mensajeDeError } from '@/api/mensajeDeError';
+
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { IconoAviso } from '@/components/ui/icono-aviso';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { useTheme } from '@/hooks/use-theme';
-import { login } from '@/services/authService';
+import { login } from '@/features/auth/services/auth-service';
+import { esAdministrador } from '@/features/sesion/sesion';
 
 export default function LoginScreen() {
     const theme = useTheme();
@@ -37,9 +41,13 @@ export default function LoginScreen() {
         setLoading(true);
         try {
             const datos = await login({ correo: correo.trim(), password });
+            if (esAdministrador(datos)) {
+                setError('Esta app es para estudiantes y organizadores. Ingresa desde el panel web de EventU.');
+                return;
+            }
             await iniciarSesion(datos);
         } catch (e) {
-            setError(e instanceof Error ? e.message : 'No se pudo iniciar sesión.');
+            setError(mensajeDeError(e));
         } finally {
             setLoading(false);
         }
@@ -55,19 +63,25 @@ export default function LoginScreen() {
             <SafeAreaView style={styles.flex}>
                 <KeyboardAvoidingView
                     style={styles.flex}
-                    behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+                    behavior="padding">
                     <ScrollView
                         contentContainerStyle={styles.container}
                         keyboardShouldPersistTaps="handled">
-                        <ThemedText type="subtitle" style={[styles.loraBold, styles.centered]}>
+                        <Image
+                            source={require('@/assets/images/iconoEventU.png')}
+                            style={styles.logo}
+                            contentFit="contain"
+                            accessible={false}
+                        />
+                        <ThemedText type="subtitle" style={styles.centered}>
                             EventU
                         </ThemedText>
-                        <ThemedText type="subtitle" style={[styles.loraBold, styles.centered]}>
+                        <ThemedText type="subtitle" style={styles.centered}>
                             Inicia sesión
                         </ThemedText>
                         <ThemedText
                             themeColor="textSecondary"
-                            style={[styles.loraBold, styles.centered]}>
+                            style={styles.centered}>
                             Ingresa con tu correo institucional
                         </ThemedText>
 
@@ -108,12 +122,18 @@ export default function LoginScreen() {
                         </View>
 
                         {error && (
-                            <ThemedText
-                                themeColor="error"
+                            <View
                                 accessibilityRole="alert"
-                                accessibilityLiveRegion="polite">
-                                {error}
-                            </ThemedText>
+                                accessibilityLiveRegion="polite"
+                                style={[
+                                    styles.alertaError,
+                                    { backgroundColor: theme.errorBackground, borderColor: theme.softRedBackground },
+                                ]}>
+                                <IconoAviso tipo="error" style={styles.iconoAlerta} />
+                                <ThemedText type="small" themeColor="error" style={styles.textoAlerta}>
+                                    {error}
+                                </ThemedText>
+                            </View>
                         )}
 
                         <Pressable
@@ -144,9 +164,19 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
     flex: { flex: 1 },
+    logo: { width: 42, height: 41, alignSelf: 'center' },
     field: { gap: Spacing.two },
     centered: { textAlign: 'center' },
-    loraBold: { fontFamily: 'Lora_700Bold' },
+    alertaError: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: Spacing.two,
+        borderWidth: 1,
+        borderRadius: 4,
+        padding: Spacing.two,
+    },
+    iconoAlerta: { marginTop: 2 },
+    textoAlerta: { flex: 1 },
     container: {
         flexGrow: 1,
         justifyContent: 'center',

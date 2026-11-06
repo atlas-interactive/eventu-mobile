@@ -1,9 +1,10 @@
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
 import { CLAVE_SESION } from '@/constants/session';
 
-// Cliente HTTP único: centraliza la URL base, el timeout y el token JWT
+// Cliente HTTP único: centraliza la URL base, el timeout y el token JWT.
+// Los errores llegan sin cambios; cada pantalla obtiene el mensaje con mensajeDeError()
 export const api = axios.create({
     baseURL: process.env.EXPO_PUBLIC_API_URL,
     // Render (plan gratuito) tarda en despertar la primera vez, por eso el timeout es de 60 segundos
@@ -19,18 +20,21 @@ api.interceptors.request.use(async (config) => {
     return config;
 });
 
-// Convierte los errores del backend en mensajes en español
+type ManejadorSesionExpirada = () => void;
+let alExpirarSesion: ManejadorSesionExpirada | null = null;
+
+// El AuthProvider registra aquí qué hacer cuando el backend rechaza el token
+export const registrarSesionExpirada = (manejador: ManejadorSesionExpirada | null) => {
+    alExpirarSesion = manejador;
+};
+
+// Un 401 en una petición que llevaba token significa que la sesión venció o dejó de ser válida
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
-        if (axios.isAxiosError<{ error?: string }>(error)) {
-            if (error.code === 'ECONNABORTED') {
-                return Promise.reject(
-                    new Error('El servidor tardó demasiado en responder. Intenta de nuevo.'),
-                );
-            }
-            const mensaje = error.response?.data?.error;
-            return Promise.reject(new Error(mensaje ?? 'No se pudo conectar con el servidor.'));
+    async (error) => {
+        if (isAxiosError(error) && error.response?.status === 401 && error.config?.headers?.Authorization) {
+            await SecureStore.deleteItemAsync(CLAVE_SESION);
+            alExpirarSesion?.();
         }
         return Promise.reject(error);
     },
