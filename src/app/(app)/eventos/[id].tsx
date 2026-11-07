@@ -10,7 +10,10 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Skeleton, SkeletonEstado } from '@/components/ui/skeleton';
 import { Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/auth-context';
+import { ConfirmacionInscripcion } from '@/features/eventos/components/confirmacion-inscripcion';
 import { obtenerEvento } from '@/features/eventos/services/evento-service';
+import { useInscripcionEvento } from '@/hooks/eventos/use-inscripcion-evento';
 import { useTheme } from '@/hooks/use-theme';
 import type { Evento } from '@/types/evento';
 
@@ -35,6 +38,8 @@ export default function DetalleEvento() {
     const [cargando, setCargando] = useState(idValido);
     const [error, setError] = useState('');
     const [noEncontrado, setNoEncontrado] = useState(!idValido);
+    const { usuario } = useAuth();
+    const inscripcion = useInscripcionEvento(idEvento, idValido);
 
     useEffect(() => {
         if (!idValido) return;
@@ -55,6 +60,7 @@ export default function DetalleEvento() {
 
     const cancelado = evento?.estado === 'CANCELADO';
     const agotado = !!evento && evento.cuposDisponibles <= 0;
+    const esPropio = evento?.organizadorId === usuario?.usuarioId;
     const inscritos = evento
         ? Math.min(evento.cuposMaximos, Math.max(0, evento.cuposMaximos - evento.cuposDisponibles))
         : 0;
@@ -65,6 +71,16 @@ export default function DetalleEvento() {
     else if (agotado) mensajeEstado = 'Cupos agotados';
     else if (evento && evento.estado !== 'PUBLICADO')
         mensajeEstado = 'No se permiten inscripciones en eventos que no estén publicados.';
+    else if (esPropio) mensajeEstado = 'No puedes inscribirte en un evento que tú organizas.';
+
+    const botonDeshabilitado = inscripcion.verificando || inscripcion.yaInscrito || inscripcion.inscribiendo;
+    let textoBoton = 'Inscribirme al evento';
+    if (inscripcion.verificando) textoBoton = 'Verificando inscripción…';
+    else if (inscripcion.errorVerificacion) textoBoton = 'Reintentar verificación';
+    else if (inscripcion.yaInscrito) textoBoton = 'Ya estás inscrito';
+    else if (inscripcion.inscribiendo) textoBoton = 'Inscribiendo…';
+
+    if (inscripcion.inscripcionRealizada && evento) return <ConfirmacionInscripcion evento={evento} />;
 
     return (
         <ThemedView style={styles.flex}>
@@ -222,6 +238,36 @@ export default function DetalleEvento() {
                                     {mensajeEstado}
                                 </ThemedText>
                             </View>
+                        )}
+                        {!mensajeEstado && (
+                            <Pressable
+                                accessibilityRole="button"
+                                accessibilityState={{ disabled: botonDeshabilitado, busy: inscripcion.inscribiendo }}
+                                disabled={botonDeshabilitado}
+                                onPress={
+                                    inscripcion.errorVerificacion ? inscripcion.reintentarVerificacion : inscripcion.inscribir
+                                }
+                                style={[
+                                    styles.estado,
+                                    { backgroundColor: botonDeshabilitado ? theme.disabledButton : theme.primary },
+                                ]}>
+                                <ThemedText
+                                    type="smallBold"
+                                    themeColor={botonDeshabilitado ? 'textSecondary' : 'onPrimary'}
+                                    style={styles.centrado}>
+                                    {textoBoton}
+                                </ThemedText>
+                            </Pressable>
+                        )}
+                        {!!inscripcion.errorVerificacion && (
+                            <ThemedText type="small" themeColor="error" accessibilityRole="alert">
+                                No se pudo verificar si ya estás inscrito: {inscripcion.errorVerificacion}
+                            </ThemedText>
+                        )}
+                        {!!inscripcion.error && (
+                            <ThemedText type="small" themeColor="error" accessibilityRole="alert">
+                                {inscripcion.error}
+                            </ThemedText>
                         )}
                     </View>
                 )}

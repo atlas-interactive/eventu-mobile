@@ -34,6 +34,9 @@ export default function RootLayout() {
 function NavegacionRaiz() {
     const { usuario, loading } = useAuth();
 
+    // Mientras se lee la sesión se sigue viendo el splash
+    if (loading) return null;
+
     return (
         <>
             <Stack screenOptions={{ headerShown: false }}>

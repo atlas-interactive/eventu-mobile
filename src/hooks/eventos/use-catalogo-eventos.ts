@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { mensajeDeError } from '@/api/mensajeDeError';
 import { listarCategorias } from '@/features/categorias/services/categoria-service';
@@ -14,6 +15,8 @@ export function useCatalogoEventos() {
     const [categorias, setCategorias] = useState<Categoria[]>([]);
     const [filtros, setFiltros] = useState<FiltrosEvento>({});
     const [errorCategorias, setErrorCategorias] = useState('');
+    const [recarga, setRecarga] = useState(0);
+    const primeraVez = useRef(true);
     const rangoFechasInvalido = fechasInvalidas(filtros);
     // Esta cargando mientras la última respuesta no corresponda a los filtros actuales
     const cargando = !rangoFechasInvalido && resultado?.para !== filtros;
@@ -38,6 +41,17 @@ export function useCatalogoEventos() {
         };
     }, []);
 
+    // Al volver al catálogo se piden los eventos otra vez para ver los cupos al día
+    useFocusEffect(
+        useCallback(() => {
+            if (primeraVez.current) {
+                primeraVez.current = false;
+                return;
+            }
+            setRecarga((n) => n + 1);
+        }, []),
+    );
+
     useEffect(() => {
         if (rangoFechasInvalido) return;
         let vigente = true;
@@ -58,7 +72,7 @@ export function useCatalogoEventos() {
             vigente = false;
             clearTimeout(temporizador);
         };
-    }, [filtros, rangoFechasInvalido]);
+    }, [filtros, rangoFechasInvalido, recarga]);
 
     return {
         eventos,
