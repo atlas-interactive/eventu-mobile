@@ -15,7 +15,7 @@ const formatoFecha = new Intl.DateTimeFormat('es-CO', {
     month: 'long',
     year: 'numeric',
 });
-const formatoHora = new Intl.DateTimeFormat('es-CO', { hour: '2-digit', minute: '2-digit', hour12: false });
+const formatoHora = new Intl.DateTimeFormat('es-CO', { hour: '2-digit', minute: '2-digit' });
 
 interface ConfirmacionInscripcionProps {
     evento: Evento;
