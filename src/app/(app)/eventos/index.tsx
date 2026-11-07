@@ -1,3 +1,4 @@
+import { Link } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
@@ -172,9 +173,20 @@ export default function CatalogoEventos() {
                                             ]}
                                         />
                                     </View>
-                                    <ThemedText type="small" themeColor="textSecondary">
-                                        {evento.cuposDisponibles} cupos disponibles de {evento.cuposMaximos}
-                                    </ThemedText>
+                                    <View style={styles.pieTarjeta}>
+                                        <ThemedText type="small" themeColor="textSecondary" style={styles.textoCupos}>
+                                            {evento.cuposDisponibles} cupos disponibles de {evento.cuposMaximos}
+                                        </ThemedText>
+                                        <Link href={`/eventos/${evento.id}`} asChild>
+                                            <Pressable
+                                                accessibilityRole="link"
+                                                accessibilityLabel={`Ver detalle de ${evento.titulo}`}
+                                                hitSlop={4}
+                                                style={StyleSheet.flatten([styles.detalle, { backgroundColor: theme.surface, borderColor: theme.fieldBorder }])}>
+                                                <ThemedText type="smallBold">Ver detalle</ThemedText>
+                                            </Pressable>
+                                        </Link>
+                                    </View>
                                 </View>
                             ))}
                         </View>
@@ -219,4 +231,13 @@ const styles = StyleSheet.create({
     titulo: { fontSize: 16, lineHeight: 24 },
     cupos: { height: 4, borderRadius: 9999, overflow: 'hidden' },
     cuposOcupados: { height: '100%' },
+    pieTarjeta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two },
+    textoCupos: { flexShrink: 1 },
+    detalle: {
+        minHeight: 36,
+        borderWidth: 1,
+        borderRadius: 6,
+        justifyContent: 'center',
+        paddingHorizontal: 12,
+    },
 });
