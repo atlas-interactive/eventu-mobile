@@ -1,3 +1,4 @@
+import { SymbolView } from 'expo-symbols';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -6,6 +7,7 @@ import { ThemedView } from '@/components/themed-view';
 import { IconoAviso } from '@/components/ui/icono-aviso';
 import { Skeleton, SkeletonEstado } from '@/components/ui/skeleton';
 import { Spacing } from '@/constants/theme';
+import { ConfirmarCancelacionInscripcion } from '@/features/inscripciones/components/confirmar-cancelacion-inscripcion';
 import { useMisInscripciones, type FiltroInscripcion } from '@/hooks/inscripciones/use-mis-inscripciones';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -49,6 +51,16 @@ export default function MisInscripciones() {
                         <IconoAviso tipo="error" style={styles.iconoMensaje} />
                         <ThemedText type="small" themeColor="error" style={styles.flex}>
                             {misInscripciones.error}
+                        </ThemedText>
+                    </View>
+                )}
+                {!!misInscripciones.mensajeExito && (
+                    <View
+                        accessibilityRole="alert"
+                        style={[styles.mensaje, { backgroundColor: theme.successBackground, borderColor: theme.success }]}>
+                        <IconoAviso tipo="exito" style={styles.iconoMensaje} />
+                        <ThemedText type="small" themeColor="success" style={styles.flex}>
+                            {misInscripciones.mensajeExito}
                         </ThemedText>
                     </View>
                 )}
@@ -135,15 +147,43 @@ export default function MisInscripciones() {
                                                 {activa ? 'Inscripción activa' : 'Cancelada'}
                                             </ThemedText>
                                         </View>
-                                        <ThemedText type="small" themeColor="textSecondary" style={styles.fecha}>
-                                            {formatoFecha.format(fecha)}, {formatoHora.format(fecha)}
-                                        </ThemedText>
+                                        <View style={styles.filaFecha}>
+                                            <ThemedText type="small" themeColor="textSecondary" style={styles.fecha}>
+                                                {formatoFecha.format(fecha)}, {formatoHora.format(fecha)}
+                                            </ThemedText>
+                                            {activa && (
+                                                <Pressable
+                                                    accessibilityRole="button"
+                                                    accessibilityLabel={`Cancelar inscripción a ${inscripcion.eventoTitulo}`}
+                                                    hitSlop={4}
+                                                    onPress={() => misInscripciones.solicitarCancelacion(inscripcion)}
+                                                    style={[styles.cancelar, { borderColor: theme.primary }]}>
+                                                    <SymbolView
+                                                        name={{ ios: 'xmark.circle', android: 'cancel', web: 'cancel' }}
+                                                        size={16}
+                                                        tintColor={theme.primary}
+                                                    />
+                                                    <ThemedText type="smallBold" themeColor="primary" style={styles.fecha}>
+                                                        Cancelar
+                                                    </ThemedText>
+                                                </Pressable>
+                                            )}
+                                        </View>
                                     </View>
                                 );
                             })}
                         </View>
                     )}
             </ScrollView>
+            {misInscripciones.aCancelar && (
+                <ConfirmarCancelacionInscripcion
+                    inscripcion={misInscripciones.aCancelar}
+                    cancelando={misInscripciones.cancelando}
+                    error={misInscripciones.errorCancelacion}
+                    onCerrar={misInscripciones.cerrarConfirmacion}
+                    onConfirmar={misInscripciones.confirmarCancelacion}
+                />
+            )}
         </ThemedView>
     );
 }
@@ -190,4 +230,14 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     fecha: { fontSize: 12, lineHeight: 16 },
+    filaFecha: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two },
+    cancelar: {
+        minHeight: 32,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        borderWidth: 1,
+        borderRadius: 6,
+        paddingHorizontal: 10,
+    },
 });
