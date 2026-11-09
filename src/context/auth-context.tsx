@@ -10,6 +10,8 @@ interface AuthContextType {
     loading: boolean;
     iniciarSesion: (datos: LoginResponse) => Promise<void>;
     cerrarSesion: () => Promise<void>;
+    actualizarNombre: (nombre: string) => Promise<void>;
+    actualizarToken: (token: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -46,8 +48,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUsuario(null);
     };
 
+    // Cambia el nombre guardado tras editar el perfil
+    const actualizarNombre = async (nombre: string) => {
+        if (!usuario) return;
+        const datos = { ...usuario, nombre };
+        await SecureStore.setItemAsync(CLAVE_SESION, JSON.stringify(datos));
+        setUsuario(datos);
+    };
+
+    //Guarda el token nuevo que da el backend al cambiar la contraseña.
+    const actualizarToken = async (token: string) => {
+        if (!usuario) return;
+        const datos = { ...usuario, token };
+        await SecureStore.setItemAsync(CLAVE_SESION, JSON.stringify(datos));
+        setUsuario(datos);
+    };
+
     return (
-        <AuthContext.Provider value={{ usuario, loading, iniciarSesion, cerrarSesion }}>
+        <AuthContext.Provider value={{ usuario, loading, iniciarSesion, cerrarSesion, actualizarNombre, actualizarToken }}>
             {children}
         </AuthContext.Provider>
     );
