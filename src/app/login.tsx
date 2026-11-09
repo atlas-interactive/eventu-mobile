@@ -24,7 +24,7 @@ import { esAdministrador } from '@/features/sesion/sesion';
 
 export default function LoginScreen() {
     const theme = useTheme();
-    const { iniciarSesion } = useAuth();
+    const { iniciarSesion, avisoLogin } = useAuth();
 
     const [correo, setCorreo] = useState('');
     const [password, setPassword] = useState('');
@@ -84,6 +84,21 @@ export default function LoginScreen() {
                             style={styles.centered}>
                             Ingresa con tu correo institucional
                         </ThemedText>
+
+                        {!!avisoLogin && (
+                            <View
+                                accessibilityRole="alert"
+                                accessibilityLiveRegion="polite"
+                                style={[
+                                    styles.alertaError,
+                                    { backgroundColor: theme.successBackground, borderColor: theme.success },
+                                ]}>
+                                <IconoAviso tipo="exito" style={styles.iconoAlerta} />
+                                <ThemedText type="small" themeColor="success" style={styles.textoAlerta}>
+                                    {avisoLogin}
+                                </ThemedText>
+                            </View>
+                        )}
 
                         <View style={styles.field}>
                             <ThemedText type="smallBold">Correo institucional</ThemedText>

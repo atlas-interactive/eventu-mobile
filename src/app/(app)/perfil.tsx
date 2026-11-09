@@ -12,6 +12,7 @@ import { Skeleton, SkeletonEstado } from '@/components/ui/skeleton';
 import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { CambiarContrasena } from '@/features/perfil/components/cambiar-contrasena';
+import { DesactivarCuenta } from '@/features/perfil/components/desactivar-cuenta';
 import { actualizarPerfil, obtenerPerfil } from '@/features/perfil/services/perfil-service';
 import { useTheme } from '@/hooks/use-theme';
 import type { PerfilUsuario } from '@/types/perfil';
@@ -292,6 +293,7 @@ export default function Perfil() {
                     )}
 
                     {perfil && !cargando && <CambiarContrasena onMensajeExito={setMensajeExito} />}
+                    {perfil && !cargando && <DesactivarCuenta />}
                 </ScrollView>
             </KeyboardAvoidingView>
         </ThemedView>
