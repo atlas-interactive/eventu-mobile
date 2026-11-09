@@ -10,6 +10,10 @@ interface AuthContextType {
     loading: boolean;
     iniciarSesion: (datos: LoginResponse) => Promise<void>;
     cerrarSesion: () => Promise<void>;
+    actualizarNombre: (nombre: string) => Promise<void>;
+    actualizarToken: (token: string) => Promise<void>;
+    avisoLogin: string;
+    mostrarAvisoLogin: (mensaje: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -17,6 +21,8 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [usuario, setUsuario] = useState<LoginResponse | null>(null);
     const [loading, setLoading] = useState(true);
+    // Mensaje que el login muestra al volver, por ejemplo tras desactivar la cuenta
+    const [avisoLogin, mostrarAvisoLogin] = useState('');
 
     // Al abrir la app, recupera la sesión guardada en el teléfono
     useEffect(() => {
@@ -37,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Guarda la sesión en el teléfono y en memoria tras un login exitoso
     const iniciarSesion = async (datos: LoginResponse) => {
         await SecureStore.setItemAsync(CLAVE_SESION, JSON.stringify(datos));
+        mostrarAvisoLogin('');
         setUsuario(datos);
     };
 
@@ -46,8 +53,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUsuario(null);
     };
 
+    // Cambia el nombre guardado tras editar el perfil
+    const actualizarNombre = async (nombre: string) => {
+        if (!usuario) return;
+        const datos = { ...usuario, nombre };
+        await SecureStore.setItemAsync(CLAVE_SESION, JSON.stringify(datos));
+        setUsuario(datos);
+    };
+
+    //Guarda el token nuevo que da el backend al cambiar la contraseña.
+    const actualizarToken = async (token: string) => {
+        if (!usuario) return;
+        const datos = { ...usuario, token };
+        await SecureStore.setItemAsync(CLAVE_SESION, JSON.stringify(datos));
+        setUsuario(datos);
+    };
+
     return (
-        <AuthContext.Provider value={{ usuario, loading, iniciarSesion, cerrarSesion }}>
+        <AuthContext.Provider value={{
+                usuario,
+                loading,
+                iniciarSesion,
+                cerrarSesion,
+                actualizarNombre,
+                actualizarToken,
+                avisoLogin,
+                mostrarAvisoLogin,
+            }}>
             {children}
         </AuthContext.Provider>
     );
