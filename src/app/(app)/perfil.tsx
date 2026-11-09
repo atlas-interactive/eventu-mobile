@@ -11,6 +11,7 @@ import { IconoAviso } from '@/components/ui/icono-aviso';
 import { Skeleton, SkeletonEstado } from '@/components/ui/skeleton';
 import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
+import { CambiarContrasena } from '@/features/perfil/components/cambiar-contrasena';
 import { actualizarPerfil, obtenerPerfil } from '@/features/perfil/services/perfil-service';
 import { useTheme } from '@/hooks/use-theme';
 import type { PerfilUsuario } from '@/types/perfil';
@@ -289,6 +290,8 @@ export default function Perfil() {
                             )}
                         </View>
                     )}
+
+                    {perfil && !cargando && <CambiarContrasena onMensajeExito={setMensajeExito} />}
                 </ScrollView>
             </KeyboardAvoidingView>
         </ThemedView>
