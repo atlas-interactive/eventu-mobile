@@ -6,6 +6,7 @@ import {
     Pressable,
     ScrollView,
     StyleSheet,
+    Text,
     TextInput,
     View,
 } from 'react-native';
@@ -73,10 +74,10 @@ export default function LoginScreen() {
                             contentFit="contain"
                             accessible={false}
                         />
-                        <ThemedText type="subtitle" style={styles.centered}>
-                            EventU
+                        <ThemedText type="smallBold" accessibilityLabel="EventU" style={[styles.centered, styles.marca]}>
+                            Event<Text style={{ color: theme.primary }}>U</Text>
                         </ThemedText>
-                        <ThemedText type="subtitle" style={styles.centered}>
+                        <ThemedText type="smallBold" style={[styles.centered, styles.titulo]}>
                             Inicia sesión
                         </ThemedText>
                         <ThemedText
@@ -96,6 +97,21 @@ export default function LoginScreen() {
                                 <IconoAviso tipo="exito" style={styles.iconoAlerta} />
                                 <ThemedText type="small" themeColor="success" style={styles.textoAlerta}>
                                     {avisoLogin}
+                                </ThemedText>
+                            </View>
+                        )}
+
+                        {error && (
+                            <View
+                                accessibilityRole="alert"
+                                accessibilityLiveRegion="polite"
+                                style={[
+                                    styles.alertaError,
+                                    { backgroundColor: theme.errorBackground, borderColor: theme.softRedBackground },
+                                ]}>
+                                <IconoAviso tipo="error" style={styles.iconoAlerta} />
+                                <ThemedText type="small" themeColor="error" style={styles.textoAlerta}>
+                                    {error}
                                 </ThemedText>
                             </View>
                         )}
@@ -136,21 +152,6 @@ export default function LoginScreen() {
                             />
                         </View>
 
-                        {error && (
-                            <View
-                                accessibilityRole="alert"
-                                accessibilityLiveRegion="polite"
-                                style={[
-                                    styles.alertaError,
-                                    { backgroundColor: theme.errorBackground, borderColor: theme.softRedBackground },
-                                ]}>
-                                <IconoAviso tipo="error" style={styles.iconoAlerta} />
-                                <ThemedText type="small" themeColor="error" style={styles.textoAlerta}>
-                                    {error}
-                                </ThemedText>
-                            </View>
-                        )}
-
                         <Pressable
                             onPress={handleLogin}
                             disabled={loading}
@@ -182,6 +183,8 @@ const styles = StyleSheet.create({
     logo: { width: 42, height: 41, alignSelf: 'center' },
     field: { gap: Spacing.two },
     centered: { textAlign: 'center' },
+    marca: { fontSize: 32, lineHeight: 42 },
+    titulo: { fontSize: 20, lineHeight: 28 },
     alertaError: {
         flexDirection: 'row',
         alignItems: 'flex-start',
