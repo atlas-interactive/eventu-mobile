@@ -1,7 +1,7 @@
 import { SymbolView } from 'expo-symbols';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { EncabezadoApp } from '@/components/encabezado-app';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconoAviso } from '@/components/ui/icono-aviso';
@@ -33,14 +33,11 @@ export default function MisInscripciones() {
 
     return (
         <ThemedView style={styles.flex}>
-            <SafeAreaView edges={['top']} style={{ backgroundColor: theme.surface }}>
-                <View style={[styles.encabezado, { borderBottomColor: theme.border }]}>
-                    <ThemedText type="smallBold" style={styles.titulo}>
-                        Mis inscripciones
-                    </ThemedText>
-                </View>
-            </SafeAreaView>
+            <EncabezadoApp />
             <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.contenido}>
+                <ThemedText type="smallBold" accessibilityRole="header" style={styles.titulo}>
+                    Mis inscripciones
+                </ThemedText>
                 {!!misInscripciones.error && (
                     <View
                         accessibilityRole="alert"
@@ -190,14 +187,7 @@ export default function MisInscripciones() {
 
 const styles = StyleSheet.create({
     flex: { flex: 1 },
-    encabezado: {
-        minHeight: 52,
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderBottomWidth: 1,
-        paddingHorizontal: Spacing.three,
-    },
-    titulo: { fontSize: 18, lineHeight: 26 },
+    titulo: { fontSize: 22, lineHeight: 30 },
     contenido: { padding: Spacing.three, gap: 12 },
     mensaje: {
         flexDirection: 'row',

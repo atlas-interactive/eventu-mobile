@@ -2,8 +2,8 @@ import { Link } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { EncabezadoApp } from '@/components/encabezado-app';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Skeleton, SkeletonEstado } from '@/components/ui/skeleton';
@@ -53,43 +53,39 @@ export default function CatalogoEventos() {
 
     return (
         <ThemedView style={styles.flex}>
-            <SafeAreaView edges={['top']} style={{ backgroundColor: theme.surface }}>
-                <View style={[styles.encabezado, { borderBottomColor: theme.border }]}>
-                    <ThemedText type="smallBold" style={styles.marca}>
-                        EventU
-                    </ThemedText>
-                    <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={buscando ? 'Cerrar búsqueda' : 'Buscar eventos'}
-                        hitSlop={12}
-                        onPress={alternarBusqueda}>
-                        <SymbolView
-                            name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }}
-                            size={20}
-                            tintColor={theme.text}
-                        />
-                    </Pressable>
+            <EncabezadoApp>
+                <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={buscando ? 'Cerrar búsqueda' : 'Buscar eventos'}
+                    hitSlop={12}
+                    onPress={alternarBusqueda}
+                    style={styles.lupa}>
+                    <SymbolView
+                        name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }}
+                        size={20}
+                        tintColor={theme.text}
+                    />
+                </Pressable>
+            </EncabezadoApp>
+            {buscando && (
+                <View style={[styles.buscador, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
+                    <TextInput
+                        autoFocus
+                        accessibilityLabel="Buscar eventos"
+                        style={[
+                            styles.inputBusqueda,
+                            { borderColor: theme.fieldBorder, backgroundColor: theme.surface, color: theme.text },
+                        ]}
+                        maxLength={100}
+                        placeholder="Buscar eventos..."
+                        placeholderTextColor={theme.textSecondary}
+                        value={catalogo.filtros.texto ?? ''}
+                        onChangeText={(texto) => catalogo.setFiltros({ ...catalogo.filtros, texto })}
+                        autoCorrect={false}
+                        returnKeyType="search"
+                    />
                 </View>
-                {buscando && (
-                    <View style={[styles.buscador, { borderBottomColor: theme.border }]}>
-                        <TextInput
-                            autoFocus
-                            accessibilityLabel="Buscar eventos"
-                            style={[
-                                styles.inputBusqueda,
-                                { borderColor: theme.fieldBorder, backgroundColor: theme.surface, color: theme.text },
-                            ]}
-                            maxLength={100}
-                            placeholder="Buscar eventos..."
-                            placeholderTextColor={theme.textSecondary}
-                            value={catalogo.filtros.texto ?? ''}
-                            onChangeText={(texto) => catalogo.setFiltros({ ...catalogo.filtros, texto })}
-                            autoCorrect={false}
-                            returnKeyType="search"
-                        />
-                    </View>
-                )}
-            </SafeAreaView>
+            )}
             <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.catalogo}>
                 {!!catalogo.errorCategorias && (
                     <ThemedText type="small" themeColor="error" accessibilityRole="alert">
@@ -198,15 +194,7 @@ export default function CatalogoEventos() {
 
 const styles = StyleSheet.create({
     flex: { flex: 1 },
-    encabezado: {
-        minHeight: 52,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderBottomWidth: 1,
-        paddingHorizontal: Spacing.three,
-    },
-    marca: { fontSize: 20, lineHeight: 28 },
+    lupa: { paddingHorizontal: Spacing.two },
     buscador: { borderBottomWidth: 1, padding: Spacing.three },
     inputBusqueda: {
         minHeight: 40,
