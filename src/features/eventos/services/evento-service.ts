@@ -1,5 +1,5 @@
 import { api } from '@/api/client';
-import type { Evento, FiltrosEvento } from '@/types/evento';
+import type { Evento, FiltrosEvento, InscritoEvento } from '@/types/evento';
 
 // Quita los filtros vacíos para no enviarlos como parámetros
 const obtenerParametros = (filtros: FiltrosEvento) =>
@@ -23,6 +23,28 @@ export const obtenerEvento = async (id: number): Promise<Evento> => {
     const { data } = await api.get<Evento>(`/eventos/${id}`);
     if (!data || typeof data !== 'object' || Array.isArray(data)) {
         throw new Error('La respuesta de /eventos/{id} no es un evento válido.');
+    }
+    return data;
+};
+
+// Solo el organizador del evento o un admin pueden verlos
+export const listarInscritosEvento = async (id: number): Promise<InscritoEvento[]> => {
+    const url = `/eventos/${id}/inscritos`;
+    const { data } = await api.get<InscritoEvento[]>(url);
+    if (
+        !Array.isArray(data) ||
+        data.some(
+            (inscrito) =>
+                !inscrito ||
+                typeof inscrito.inscripcionId !== 'number' ||
+                typeof inscrito.usuarioId !== 'number' ||
+                typeof inscrito.nombre !== 'string' ||
+                typeof inscrito.correo !== 'string' ||
+                typeof inscrito.fechaInscripcion !== 'string' ||
+                typeof inscrito.asistio !== 'boolean',
+        )
+    ) {
+        throw new Error(`La respuesta de ${url} no es una lista válida de inscritos.`);
     }
     return data;
 };

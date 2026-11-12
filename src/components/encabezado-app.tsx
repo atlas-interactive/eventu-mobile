@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
@@ -14,9 +14,11 @@ interface EncabezadoAppProps {
 
 export function EncabezadoApp({ children }: EncabezadoAppProps) {
     const theme = useTheme();
+    // El alto de la barra de estado se toma del celular, no de la posición de la pantalla
+    const insets = useSafeAreaInsets();
 
     return (
-        <SafeAreaView edges={['top']} style={{ backgroundColor: theme.surface }}>
+        <View style={{ backgroundColor: theme.surface, paddingTop: insets.top }}>
             <View style={[styles.barra, { borderBottomColor: theme.border }]}>
                 <View style={styles.marca}>
                     <Image
@@ -31,7 +33,7 @@ export function EncabezadoApp({ children }: EncabezadoAppProps) {
                 </View>
                 {children}
             </View>
-        </SafeAreaView>
+        </View>
     );
 }
 
