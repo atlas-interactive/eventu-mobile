@@ -2,6 +2,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { mensajeDeError } from '@/api/mensajeDeError';
+import { listarEventos } from '@/features/eventos/services/evento-service';
 import {
     cancelarInscripcion,
     listarMisInscripciones,
@@ -35,12 +36,18 @@ export function useMisInscripciones() {
 
     useEffect(() => {
         let vigente = true;
-        listarMisInscripciones()
-            .then((datos) => {
-                if (vigente) {
-                    setInscripciones(datos);
-                    setError('');
-                }
+        Promise.all([listarMisInscripciones(), listarEventos()])
+            .then(([datos, eventos]) => {
+                if (!vigente) return;
+                // /inscripciones/mias no trae el estado del evento, se toma de la lista de eventos
+                const estadosPorEvento = new Map(eventos.map(({ id, estado }) => [id, estado]));
+                setInscripciones(
+                    datos.map((inscripcion) => ({
+                        ...inscripcion,
+                        eventoEstado: estadosPorEvento.get(inscripcion.eventoId) ?? inscripcion.eventoEstado,
+                    })),
+                );
+                setError('');
             })
             .catch((err: unknown) => {
                 console.error('No se pudieron cargar las inscripciones:', err);
@@ -55,7 +62,10 @@ export function useMisInscripciones() {
         };
     }, [recarga]);
 
-    const conteos = inscripciones.reduce(
+    const publicadas = inscripciones.filter(
+        (inscripcion) => inscripcion.eventoEstado?.trim().toUpperCase() === 'PUBLICADO',
+    );
+    const conteos = publicadas.reduce(
         (total, inscripcion) => {
             total.TODAS += 1;
             total[inscripcion.estado] += 1;
@@ -64,8 +74,8 @@ export function useMisInscripciones() {
         { TODAS: 0, ACTIVA: 0, CANCELADA: 0 },
     );
     const visibles = filtro === 'TODAS'
-        ? inscripciones
-        : inscripciones.filter((inscripcion) => inscripcion.estado === filtro);
+        ? publicadas
+        : publicadas.filter((inscripcion) => inscripcion.estado === filtro);
 
     const solicitarCancelacion = (inscripcion: Inscripcion) => {
         setErrorCancelacion('');

@@ -1,4 +1,4 @@
-import { SymbolView } from 'expo-symbols';
+import { useRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { EncabezadoApp } from '@/components/encabezado-app';
@@ -7,19 +7,10 @@ import { ThemedView } from '@/components/themed-view';
 import { IconoAviso } from '@/components/ui/icono-aviso';
 import { Skeleton, SkeletonEstado } from '@/components/ui/skeleton';
 import { Spacing } from '@/constants/theme';
+import { CalendarioInscripciones } from '@/features/inscripciones/components/calendario-inscripciones';
 import { ConfirmarCancelacionInscripcion } from '@/features/inscripciones/components/confirmar-cancelacion-inscripcion';
 import { useMisInscripciones, type FiltroInscripcion } from '@/hooks/inscripciones/use-mis-inscripciones';
 import { useTheme } from '@/hooks/use-theme';
-
-const formatoFecha = new Intl.DateTimeFormat('es-CO', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-});
-const formatoHora = new Intl.DateTimeFormat('es-CO', {
-    hour: '2-digit',
-    minute: '2-digit',
-});
 
 const filtros: { valor: FiltroInscripcion; etiqueta: string }[] = [
     { valor: 'TODAS', etiqueta: 'Todas' },
@@ -30,11 +21,15 @@ const filtros: { valor: FiltroInscripcion; etiqueta: string }[] = [
 export default function MisInscripciones() {
     const misInscripciones = useMisInscripciones();
     const theme = useTheme();
+    const scrollRef = useRef<ScrollView>(null);
 
     return (
         <ThemedView style={styles.flex}>
             <EncabezadoApp />
-            <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.contenido}>
+            <ScrollView
+                ref={scrollRef}
+                contentInsetAdjustmentBehavior="automatic"
+                contentContainerStyle={styles.contenido}>
                 <ThemedText type="smallBold" accessibilityRole="header" style={styles.titulo}>
                     Mis inscripciones
                 </ThemedText>
@@ -93,7 +88,7 @@ export default function MisInscripciones() {
                         {Array.from({ length: 3 }, (_, indice) => (
                             <View
                                 key={indice}
-                                style={[styles.tarjeta, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                                style={[styles.tarjetaCarga, { backgroundColor: theme.surface, borderColor: theme.border }]}>
                                 <Skeleton style={{ height: 20, width: '70%' }} />
                                 <Skeleton style={{ height: 16, width: '45%' }} />
                             </View>
@@ -101,76 +96,13 @@ export default function MisInscripciones() {
                     </SkeletonEstado>
                 )}
 
-                {!misInscripciones.cargando &&
-                    !misInscripciones.error &&
-                    misInscripciones.inscripciones.length === 0 && (
-                        <ThemedText type="small" themeColor="textSecondary">
-                            {misInscripciones.filtro === 'TODAS'
-                                ? 'Aún no tienes inscripciones a eventos.'
-                                : `No tienes inscripciones ${misInscripciones.filtro === 'ACTIVA' ? 'activas' : 'canceladas'}.`}
-                        </ThemedText>
-                    )}
-
-                {!misInscripciones.cargando &&
-                    !misInscripciones.error &&
-                    misInscripciones.inscripciones.length > 0 && (
-                        <View style={styles.lista}>
-                            {misInscripciones.inscripciones.map((inscripcion) => {
-                                const fecha = new Date(inscripcion.eventoFechaInicio);
-                                const activa = inscripcion.estado === 'ACTIVA';
-
-                                return (
-                                    <View
-                                        key={inscripcion.id}
-                                        style={[
-                                            styles.tarjeta,
-                                            { backgroundColor: theme.surface, borderColor: theme.border },
-                                        ]}>
-                                        <View style={styles.filaTitulo}>
-                                            <ThemedText type="smallBold" style={styles.evento}>
-                                                {inscripcion.eventoTitulo}
-                                            </ThemedText>
-                                            <ThemedText
-                                                type="small"
-                                                style={[
-                                                    styles.estado,
-                                                    activa
-                                                        ? { backgroundColor: theme.successBackground, color: theme.success }
-                                                        : {
-                                                              backgroundColor: theme.disabledButton,
-                                                              color: theme.textSecondary,
-                                                          },
-                                                ]}>
-                                                {activa ? 'Inscripción activa' : 'Cancelada'}
-                                            </ThemedText>
-                                        </View>
-                                        <View style={styles.filaFecha}>
-                                            <ThemedText type="small" themeColor="textSecondary" style={styles.fecha}>
-                                                {formatoFecha.format(fecha)}, {formatoHora.format(fecha)}
-                                            </ThemedText>
-                                            {activa && (
-                                                <Pressable
-                                                    accessibilityRole="button"
-                                                    accessibilityLabel={`Cancelar inscripción a ${inscripcion.eventoTitulo}`}
-                                                    hitSlop={4}
-                                                    onPress={() => misInscripciones.solicitarCancelacion(inscripcion)}
-                                                    style={[styles.cancelar, { borderColor: theme.primary }]}>
-                                                    <SymbolView
-                                                        name={{ ios: 'xmark.circle', android: 'cancel', web: 'cancel' }}
-                                                        size={16}
-                                                        tintColor={theme.primary}
-                                                    />
-                                                    <ThemedText type="smallBold" themeColor="primary" style={styles.fecha}>
-                                                        Cancelar
-                                                    </ThemedText>
-                                                </Pressable>
-                                            )}
-                                        </View>
-                                    </View>
-                                );
-                            })}
-                        </View>
-                    )}
+                {!misInscripciones.cargando && !misInscripciones.error && (
+                    <CalendarioInscripciones
+                        inscripciones={misInscripciones.inscripciones}
+                        onCancelar={misInscripciones.solicitarCancelacion}
+                        scrollRef={scrollRef}
+                    />
+                )}
             </ScrollView>
             {misInscripciones.aCancelar && (
                 <ConfirmarCancelacionInscripcion
@@ -208,26 +140,5 @@ const styles = StyleSheet.create({
     },
     textoFiltro: { fontSize: 12, lineHeight: 16 },
     lista: { gap: 12 },
-    tarjeta: { gap: Spacing.four, borderWidth: 1, borderRadius: 8, padding: 12 },
-    filaTitulo: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: Spacing.two },
-    evento: { flex: 1, fontSize: 15, lineHeight: 22 },
-    estado: {
-        borderRadius: 4,
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        fontSize: 12,
-        lineHeight: 16,
-        overflow: 'hidden',
-    },
-    fecha: { fontSize: 12, lineHeight: 16 },
-    filaFecha: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two },
-    cancelar: {
-        minHeight: 32,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        borderWidth: 1,
-        borderRadius: 6,
-        paddingHorizontal: 10,
-    },
+    tarjetaCarga: { gap: Spacing.four, borderWidth: 1, borderRadius: 8, padding: 12 },
 });

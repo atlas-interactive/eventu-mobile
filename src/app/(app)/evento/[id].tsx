@@ -190,10 +190,10 @@ export default function DetalleEvento() {
                             <Pressable accessibilityRole="link" hitSlop={12} onPress={volver} style={styles.volver}>
                                 <SymbolView
                                     name={{ ios: 'chevron.left', android: 'chevron_left', web: 'chevron_left' }}
-                                    size={14}
+                                    size={18}
                                     tintColor={theme.primary}
                                 />
-                                <ThemedText type="smallBold" themeColor="primary">
+                                <ThemedText type="smallBold" themeColor="primary" style={styles.textoVolver}>
                                     Volver a eventos
                                 </ThemedText>
                             </Pressable>
@@ -388,6 +388,7 @@ const styles = StyleSheet.create({
     fechaDia: { fontSize: 10, lineHeight: 12 },
     fechaNumero: { fontSize: 22, lineHeight: 26 },
     volver: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, alignSelf: 'flex-start' },
+    textoVolver: { fontSize: 16, lineHeight: 24 },
     aviso: {
         flexDirection: 'row',
         alignItems: 'flex-start',
