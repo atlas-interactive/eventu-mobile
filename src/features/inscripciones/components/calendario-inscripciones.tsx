@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, View, type ScrollView } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
+import { EntradaQr } from '@/features/inscripciones/components/entrada-qr';
 import { useTheme } from '@/hooks/use-theme';
 import type { Inscripcion } from '@/types/inscripcion';
 
@@ -43,6 +44,7 @@ export function CalendarioInscripciones({ inscripciones, onCancelar, scrollRef }
     const [referencia, setReferencia] = useState(() => new Date());
     const [vistaMes, setVistaMes] = useState(false);
     const [fechaSeleccionada, setFechaSeleccionada] = useState<string | null>(null);
+    const [inscripcionQr, setInscripcionQr] = useState<Inscripcion | null>(null);
     // Posiciones para bajar hasta los eventos de un día
     const posicionCalendario = useRef(0);
     const posicionAgenda = useRef(0);
@@ -352,6 +354,23 @@ export function CalendarioInscripciones({ inscripciones, onCancelar, scrollRef }
                                                         ]}>
                                                         {activa ? 'Inscripción activa' : 'Inscripción cancelada'}
                                                     </ThemedText>
+                                                    {activa && !!inscripcion.codigoQr && (
+                                                        <Pressable
+                                                            accessibilityRole="button"
+                                                            accessibilityLabel={`Ver QR de ${inscripcion.eventoTitulo}`}
+                                                            hitSlop={4}
+                                                            onPress={() => setInscripcionQr(inscripcion)}
+                                                            style={[styles.cancelar, { borderColor: theme.fieldBorder }]}>
+                                                            <SymbolView
+                                                                name={{ ios: 'qrcode', android: 'qr_code_2', web: 'qr_code_2' }}
+                                                                size={14}
+                                                                tintColor={theme.text}
+                                                            />
+                                                            <ThemedText type="smallBold" style={styles.textoChico}>
+                                                                Ver QR
+                                                            </ThemedText>
+                                                        </Pressable>
+                                                    )}
                                                     {activa && (
                                                         <Pressable
                                                             accessibilityRole="button"
@@ -379,6 +398,8 @@ export function CalendarioInscripciones({ inscripciones, onCancelar, scrollRef }
                     })
                 )}
             </View>
+
+            {inscripcionQr && <EntradaQr inscripcion={inscripcionQr} onCerrar={() => setInscripcionQr(null)} />}
         </View>
     );
 }

@@ -16,6 +16,7 @@ import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { obtenerEvento } from '@/features/eventos/services/evento-service';
 import { ConfirmarCancelacionInscripcion } from '@/features/inscripciones/components/confirmar-cancelacion-inscripcion';
+import { EntradaQr } from '@/features/inscripciones/components/entrada-qr';
 import { useInscripcionEvento } from '@/hooks/eventos/use-inscripcion-evento';
 import { useTheme } from '@/hooks/use-theme';
 import type { Evento } from '@/types/evento';
@@ -47,6 +48,7 @@ export default function DetalleEvento() {
     const [error, setError] = useState('');
     const [noEncontrado, setNoEncontrado] = useState(!idValido);
     const [aCancelar, setACancelar] = useState<Inscripcion | null>(null);
+    const [entradaAbierta, setEntradaAbierta] = useState(false);
     const { usuario } = useAuth();
     const inscripcion = useInscripcionEvento(idEvento, idValido);
 
@@ -325,10 +327,15 @@ export default function DetalleEvento() {
                             </View>
                             <Pressable
                                 accessibilityRole="button"
-                                hitSlop={8}
-                                onPress={() => setACancelar(inscripcion.inscripcionActiva)}>
-                                <ThemedText type="smallBold" themeColor="primary">
-                                    Cancelar mi inscripción
+                                onPress={() => setEntradaAbierta(true)}
+                                style={[styles.verEntrada, { backgroundColor: theme.text }]}>
+                                <SymbolView
+                                    name={{ ios: 'qrcode', android: 'qr_code_2', web: 'qr_code_2' }}
+                                    size={16}
+                                    tintColor={theme.surface}
+                                />
+                                <ThemedText type="smallBold" style={{ color: theme.surface }}>
+                                    Ver mi entrada
                                 </ThemedText>
                             </Pressable>
                         </View>
@@ -354,6 +361,17 @@ export default function DetalleEvento() {
                         </Pressable>
                     )}
                 </View>
+            )}
+
+            {entradaAbierta && inscripcion.inscripcionActiva && (
+                <EntradaQr
+                    inscripcion={inscripcion.inscripcionActiva}
+                    onCerrar={() => setEntradaAbierta(false)}
+                    onCancelar={() => {
+                        setEntradaAbierta(false);
+                        setACancelar(inscripcion.inscripcionActiva);
+                    }}
+                />
             )}
 
             {aCancelar && (
@@ -434,6 +452,14 @@ const styles = StyleSheet.create({
     barra: { gap: Spacing.two, borderTopWidth: 1, paddingHorizontal: Spacing.three, paddingTop: 12 },
     filaBarra: { minHeight: 44, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two },
     inscrito: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    verEntrada: {
+        minHeight: 44,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        borderRadius: 8,
+        paddingHorizontal: Spacing.three,
+    },
     boton: {
         minHeight: 48,
         borderRadius: 8,
