@@ -11,4 +11,6 @@ export interface LoginResponse {
     nombre: string;
     correo: string;
     rol: string;
+    // El backend reactiva la cuenta si estaba desactivada y lo indica aquí
+    cuentaReactivada?: boolean;
 }

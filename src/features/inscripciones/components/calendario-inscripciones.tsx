@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { useRef, useState, type RefObject } from 'react';
+import { useRef, useState, type ComponentRef, type RefObject } from 'react';
 import { Pressable, StyleSheet, View, type ScrollView } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -12,7 +12,7 @@ interface CalendarioInscripcionesProps {
     inscripciones: Inscripcion[];
     onCancelar: (inscripcion: Inscripcion) => void;
     // ScrollView de la pantalla, para bajar hasta el día que se toque
-    scrollRef: RefObject<ScrollView | null>;
+    scrollRef: RefObject<ComponentRef<typeof ScrollView> | null>;
 }
 
 const formatoMes = new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric' });

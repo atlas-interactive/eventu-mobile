@@ -20,8 +20,12 @@ import { IconoAviso } from '@/components/ui/icono-aviso';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { useTheme } from '@/hooks/use-theme';
+import { AvisoCuentaReactivada } from '@/features/auth/components/aviso-cuenta-reactivada';
 import { login } from '@/features/auth/services/auth-service';
 import { esAdministrador } from '@/features/sesion/sesion';
+import type { LoginResponse } from '@/types/auth';
+
+const correoInstitucionalRegex = /^[a-zA-Z0-9._%+-]+@unillanos\.edu\.co$/;
 
 export default function LoginScreen() {
     const theme = useTheme();
@@ -31,11 +35,20 @@ export default function LoginScreen() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [respuestaPendiente, setRespuestaPendiente] = useState<LoginResponse | null>(null);
 
     // Valida los campos, consulta el backend y guarda la sesión
     const handleLogin = async () => {
         if (!correo.trim() || !password) {
             setError('Ingresa tu correo y contraseña.');
+            return;
+        }
+        if (!correoInstitucionalRegex.test(correo.trim())) {
+            setError('Debe ingresar un correo institucional válido.');
+            return;
+        }
+        if (password.length < 8 || password.length > 72) {
+            setError('La contraseña debe tener entre 8 y 72 caracteres.');
             return;
         }
         setError(null);
@@ -44,6 +57,11 @@ export default function LoginScreen() {
             const datos = await login({ correo: correo.trim(), password });
             if (esAdministrador(datos)) {
                 setError('Esta app es para estudiantes y organizadores. Ingresa desde el panel web de EventU.');
+                return;
+            }
+            // Si la cuenta estaba desactivada, primero se avisa que se reactivó
+            if (datos.cuentaReactivada) {
+                setRespuestaPendiente(datos);
                 return;
             }
             await iniciarSesion(datos);
@@ -174,6 +192,9 @@ export default function LoginScreen() {
                     </ScrollView>
                 </KeyboardAvoidingView>
             </SafeAreaView>
+            {respuestaPendiente && (
+                <AvisoCuentaReactivada onContinuar={() => iniciarSesion(respuestaPendiente)} />
+            )}
         </ThemedView>
     );
 }

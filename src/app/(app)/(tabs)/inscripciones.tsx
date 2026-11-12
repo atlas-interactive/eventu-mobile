@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, type ComponentRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { EncabezadoApp } from '@/components/encabezado-app';
@@ -21,7 +21,7 @@ const filtros: { valor: FiltroInscripcion; etiqueta: string }[] = [
 export default function MisInscripciones() {
     const misInscripciones = useMisInscripciones();
     const theme = useTheme();
-    const scrollRef = useRef<ScrollView>(null);
+    const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
 
     return (
         <ThemedView style={styles.flex}>
