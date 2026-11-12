@@ -391,10 +391,14 @@ export default function DetalleEvento() {
                 <EntradaQr
                     inscripcion={inscripcion.inscripcionActiva}
                     onCerrar={() => setEntradaAbierta(false)}
-                    onCancelar={() => {
-                        setEntradaAbierta(false);
-                        setACancelar(inscripcion.inscripcionActiva);
-                    }}
+                    onCancelar={
+                        finalizado
+                            ? undefined
+                            : () => {
+                                  setEntradaAbierta(false);
+                                  setACancelar(inscripcion.inscripcionActiva);
+                              }
+                    }
                 />
             )}
 

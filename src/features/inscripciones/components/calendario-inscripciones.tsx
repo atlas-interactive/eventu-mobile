@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, View, type ScrollView } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
+import { yaInicio } from '@/features/eventos/evento-fechas';
 import { EntradaQr } from '@/features/inscripciones/components/entrada-qr';
 import { useTheme } from '@/hooks/use-theme';
 import type { Inscripcion } from '@/types/inscripcion';
@@ -371,7 +372,7 @@ export function CalendarioInscripciones({ inscripciones, onCancelar, scrollRef }
                                                             </ThemedText>
                                                         </Pressable>
                                                     )}
-                                                    {activa && (
+                                                    {activa && !yaInicio(inscripcion.eventoFechaInicio) && (
                                                         <Pressable
                                                             accessibilityRole="button"
                                                             accessibilityLabel={`Cancelar inscripción a ${inscripcion.eventoTitulo}`}
