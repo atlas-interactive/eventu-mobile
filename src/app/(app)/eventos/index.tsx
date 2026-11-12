@@ -1,92 +1,34 @@
 import { Link } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { EncabezadoApp } from '@/components/encabezado-app';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Skeleton, SkeletonEstado } from '@/components/ui/skeleton';
-import { FiltrosEventos } from '@/features/eventos/components/filtros-eventos';
 import { Spacing } from '@/constants/theme';
+import { FiltrosEventos } from '@/features/eventos/components/filtros-eventos';
+import { TarjetaEvento } from '@/features/eventos/components/tarjeta-evento';
+import { ordenarEventos, type OrdenEventos } from '@/features/eventos/evento-ordenamiento';
 import { useCatalogoEventos } from '@/hooks/eventos/use-catalogo-eventos';
 import { useTheme } from '@/hooks/use-theme';
-import type { Evento } from '@/types/evento';
-
-const formatoFecha = new Intl.DateTimeFormat('es-CO', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-});
-
-const cuposOcupadosPorcentaje = (evento: Evento): number => {
-    if (evento.cuposMaximos <= 0) return 0;
-    return Math.max(
-        0,
-        Math.min(100, ((evento.cuposMaximos - evento.cuposDisponibles) / evento.cuposMaximos) * 100),
-    );
-};
 
 export default function CatalogoEventos() {
     const catalogo = useCatalogoEventos();
     const theme = useTheme();
-    const [buscando, setBuscando] = useState(false);
-
-    // Al cerrar el buscador también se borra lo que se había escrito
-    const alternarBusqueda = () => {
-        if (buscando && catalogo.filtros.texto) catalogo.setFiltros({ ...catalogo.filtros, texto: undefined });
-        setBuscando(!buscando);
-    };
-
-    const categoriaEstilo = (nombre: string) => {
-        const normalizado = nombre.toLocaleLowerCase('es-CO');
-        if (normalizado.includes('cultur')) {
-            return { backgroundColor: theme.culturalPurpleBackground, color: theme.culturalPurple };
-        }
-        if (normalizado.includes('deport')) {
-            return { backgroundColor: theme.deportiveOrangeBackground, color: theme.deportiveOrange };
-        }
-        return { backgroundColor: theme.softRedBackground, color: theme.primary };
-    };
+    const [orden, setOrden] = useState<OrdenEventos>('fecha-proxima');
+    const eventosOrdenados = ordenarEventos(catalogo.eventos, orden);
 
     return (
         <ThemedView style={styles.flex}>
-            <EncabezadoApp>
-                <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={buscando ? 'Cerrar búsqueda' : 'Buscar eventos'}
-                    hitSlop={12}
-                    onPress={alternarBusqueda}
-                    style={styles.lupa}>
-                    <SymbolView
-                        name={{ ios: 'magnifyingglass', android: 'search', web: 'search' }}
-                        size={20}
-                        tintColor={theme.text}
-                    />
-                </Pressable>
-            </EncabezadoApp>
-            {buscando && (
-                <View style={[styles.buscador, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
-                    <TextInput
-                        autoFocus
-                        accessibilityLabel="Buscar eventos"
-                        style={[
-                            styles.inputBusqueda,
-                            { borderColor: theme.fieldBorder, backgroundColor: theme.surface, color: theme.text },
-                        ]}
-                        maxLength={100}
-                        placeholder="Buscar eventos..."
-                        placeholderTextColor={theme.textSecondary}
-                        value={catalogo.filtros.texto ?? ''}
-                        onChangeText={(texto) => catalogo.setFiltros({ ...catalogo.filtros, texto })}
-                        autoCorrect={false}
-                        returnKeyType="search"
-                    />
-                </View>
-            )}
-            <ScrollView contentInsetAdjustmentBehavior="automatic" contentContainerStyle={styles.catalogo}>
+            <EncabezadoApp />
+            <ScrollView
+                contentInsetAdjustmentBehavior="automatic"
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={styles.catalogo}>
+                <ThemedText type="smallBold" accessibilityRole="header" style={styles.tituloPagina}>
+                    Eventos en campus
+                </ThemedText>
                 {!!catalogo.errorCategorias && (
                     <ThemedText type="small" themeColor="error" accessibilityRole="alert">
                         {catalogo.errorCategorias}
@@ -94,8 +36,12 @@ export default function CatalogoEventos() {
                 )}
                 <FiltrosEventos
                     categorias={catalogo.categorias}
+                    cantidadEventos={eventosOrdenados.length}
                     filtros={catalogo.filtros}
+                    mostrarResumen={!catalogo.cargando && !catalogo.errorEventos && !catalogo.rangoFechasInvalido}
                     onChange={catalogo.setFiltros}
+                    orden={orden}
+                    onOrdenChange={setOrden}
                 />
                 {!!catalogo.errorEventos && (
                     <ThemedText type="small" themeColor="error" accessibilityRole="alert">
@@ -107,7 +53,7 @@ export default function CatalogoEventos() {
                         {Array.from({ length: 3 }, (_, indice) => (
                             <View
                                 key={indice}
-                                style={[styles.tarjeta, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                                style={[styles.tarjetaCarga, { backgroundColor: theme.surface, borderColor: theme.border }]}>
                                 <Skeleton style={{ height: 16, width: 80 }} />
                                 <Skeleton style={{ height: 20, width: '75%' }} />
                                 <Skeleton style={{ height: 16, width: '100%' }} />
@@ -128,62 +74,20 @@ export default function CatalogoEventos() {
                 {!catalogo.cargando &&
                     !catalogo.errorEventos &&
                     !catalogo.rangoFechasInvalido &&
-                    catalogo.eventos.length > 0 && (
+                    eventosOrdenados.length > 0 && (
                         <View style={styles.lista}>
-                            {catalogo.eventos.map((evento) => (
-                                <View
-                                    key={evento.id}
-                                    style={[styles.tarjeta, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                                    <ThemedText
-                                        type="small"
-                                        style={[styles.categoria, categoriaEstilo(evento.categoriaNombre)]}>
-                                        {evento.categoriaNombre}
-                                    </ThemedText>
-                                    <ThemedText type="smallBold" style={styles.titulo}>
-                                        {evento.titulo}
-                                    </ThemedText>
-                                    <View>
-                                        <ThemedText type="small" themeColor="textSecondary">
-                                            {formatoFecha.format(new Date(evento.fechaInicio))}
-                                        </ThemedText>
-                                        <ThemedText type="small" themeColor="textSecondary">
-                                            {evento.ubicacion}
-                                        </ThemedText>
-                                    </View>
-                                    <View
-                                        accessibilityRole="progressbar"
-                                        accessibilityLabel="Cupos ocupados"
-                                        accessibilityValue={{
-                                            min: 0,
-                                            max: evento.cuposMaximos,
-                                            now: evento.cuposMaximos - evento.cuposDisponibles,
-                                        }}
-                                        style={[styles.cupos, { backgroundColor: theme.border }]}>
-                                        <View
-                                            style={[
-                                                styles.cuposOcupados,
-                                                {
-                                                    width: `${cuposOcupadosPorcentaje(evento)}%`,
-                                                    backgroundColor: theme.primary,
-                                                },
-                                            ]}
-                                        />
-                                    </View>
-                                    <View style={styles.pieTarjeta}>
-                                        <ThemedText type="small" themeColor="textSecondary" style={styles.textoCupos}>
-                                            {evento.cuposDisponibles} cupos disponibles de {evento.cuposMaximos}
-                                        </ThemedText>
-                                        <Link href={`/eventos/${evento.id}`} asChild>
-                                            <Pressable
-                                                accessibilityRole="link"
-                                                accessibilityLabel={`Ver detalle de ${evento.titulo}`}
-                                                hitSlop={4}
-                                                style={StyleSheet.flatten([styles.detalle, { backgroundColor: theme.surface, borderColor: theme.fieldBorder }])}>
-                                                <ThemedText type="smallBold">Ver detalle</ThemedText>
-                                            </Pressable>
-                                        </Link>
-                                    </View>
-                                </View>
+                            {eventosOrdenados.map((evento) => (
+                                <TarjetaEvento key={evento.id} evento={evento}>
+                                    <Link href={`/eventos/${evento.id}`} asChild>
+                                        <Pressable
+                                            accessibilityRole="link"
+                                            accessibilityLabel={`Ver detalle de ${evento.titulo}`}
+                                            hitSlop={4}
+                                            style={StyleSheet.flatten([styles.detalle, { backgroundColor: theme.surface, borderColor: theme.fieldBorder }])}>
+                                            <ThemedText type="smallBold">Ver detalle</ThemedText>
+                                        </Pressable>
+                                    </Link>
+                                </TarjetaEvento>
                             ))}
                         </View>
                     )}
@@ -194,35 +98,13 @@ export default function CatalogoEventos() {
 
 const styles = StyleSheet.create({
     flex: { flex: 1 },
-    lupa: { paddingHorizontal: Spacing.two },
-    buscador: { borderBottomWidth: 1, padding: Spacing.three },
-    inputBusqueda: {
-        minHeight: 40,
-        borderWidth: 1,
-        borderRadius: 6,
-        paddingHorizontal: 12,
-        fontFamily: 'AtkinsonHyperlegible_400Regular',
-        fontSize: 14,
-    },
     catalogo: { padding: Spacing.three, gap: 12 },
+    tituloPagina: { fontSize: 22, lineHeight: 30 },
     lista: { gap: 12 },
-    tarjeta: { gap: Spacing.two, borderWidth: 1, borderRadius: 8, padding: 12 },
-    categoria: {
-        alignSelf: 'flex-start',
-        borderRadius: 4,
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        fontSize: 12,
-        lineHeight: 16,
-        overflow: 'hidden',
-    },
-    titulo: { fontSize: 16, lineHeight: 24 },
-    cupos: { height: 4, borderRadius: 9999, overflow: 'hidden' },
-    cuposOcupados: { height: '100%' },
-    pieTarjeta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.two },
-    textoCupos: { flexShrink: 1 },
+    tarjetaCarga: { gap: Spacing.two, borderWidth: 1, borderRadius: 8, padding: Spacing.three },
     detalle: {
         minHeight: 36,
+        alignSelf: 'flex-end',
         borderWidth: 1,
         borderRadius: 6,
         justifyContent: 'center',
