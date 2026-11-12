@@ -14,6 +14,7 @@ import { IconoAviso } from '@/components/ui/icono-aviso';
 import { Skeleton, SkeletonEstado } from '@/components/ui/skeleton';
 import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
+import { yaInicio } from '@/features/eventos/evento-fechas';
 import { obtenerEvento } from '@/features/eventos/services/evento-service';
 import { ConfirmarCancelacionInscripcion } from '@/features/inscripciones/components/confirmar-cancelacion-inscripcion';
 import { EntradaQr } from '@/features/inscripciones/components/entrada-qr';
@@ -92,12 +93,14 @@ export default function DetalleEvento() {
     };
 
     const cancelado = evento?.estado.toUpperCase() === 'CANCELADO';
+    const finalizado = !cancelado && !!evento && yaInicio(evento.fechaInicio);
     const agotado = !!evento && evento.cuposDisponibles <= 0;
     const esPropio = evento?.organizadorId === usuario?.usuarioId;
     const fechaInicio = evento ? new Date(evento.fechaInicio) : null;
 
     let mensajeEstado = '';
     if (cancelado) mensajeEstado = 'Evento cancelado';
+    else if (finalizado) mensajeEstado = 'El evento ya inició; no es posible inscribirse.';
     else if (agotado) mensajeEstado = 'Cupos agotados';
     else if (evento && evento.estado.toUpperCase() !== 'PUBLICADO')
         mensajeEstado = 'No se permiten inscripciones en eventos que no estén publicados.';
@@ -237,7 +240,14 @@ export default function DetalleEvento() {
                                         Evento cancelado
                                     </ThemedText>
                                 )}
-                                {!cancelado && agotado && (
+                                {finalizado && (
+                                    <ThemedText
+                                        type="small"
+                                        style={[styles.chip, { backgroundColor: theme.disabledButton, color: theme.text }]}>
+                                        Evento finalizado
+                                    </ThemedText>
+                                )}
+                                {!cancelado && !finalizado && agotado && (
                                     <ThemedText
                                         type="small"
                                         style={[styles.chip, { backgroundColor: theme.agotadoBackground, color: theme.agotado }]}>
