@@ -2,6 +2,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { mensajeDeError } from '@/api/mensajeDeError';
+import { yaInicio } from '@/features/eventos/evento-fechas';
 import { listarEventos } from '@/features/eventos/services/evento-service';
 import {
     cancelarInscripcion,
@@ -62,9 +63,11 @@ export function useMisInscripciones() {
         };
     }, [recarga]);
 
-    const publicadas = inscripciones.filter(
-        (inscripcion) => inscripcion.eventoEstado?.trim().toUpperCase() === 'PUBLICADO',
-    );
+    // Un evento que ya inició sale del catálogo, pero su inscripción se sigue mostrando
+    const publicadas = inscripciones.filter((inscripcion) => {
+        const estado = inscripcion.eventoEstado?.trim().toUpperCase();
+        return estado === 'PUBLICADO' || (!estado && yaInicio(inscripcion.eventoFechaInicio));
+    });
     const conteos = publicadas.reduce(
         (total, inscripcion) => {
             total.TODAS += 1;
