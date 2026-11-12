@@ -14,7 +14,7 @@ import { IconoAviso } from '@/components/ui/icono-aviso';
 import { Skeleton, SkeletonEstado } from '@/components/ui/skeleton';
 import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
-import { yaInicio } from '@/features/eventos/evento-fechas';
+import { terminoElDia, yaInicio } from '@/features/eventos/evento-fechas';
 import { obtenerEvento } from '@/features/eventos/services/evento-service';
 import { ConfirmarCancelacionInscripcion } from '@/features/inscripciones/components/confirmar-cancelacion-inscripcion';
 import { EntradaQr } from '@/features/inscripciones/components/entrada-qr';
@@ -94,6 +94,7 @@ export default function DetalleEvento() {
 
     const cancelado = evento?.estado.toUpperCase() === 'CANCELADO';
     const finalizado = !cancelado && !!evento && yaInicio(evento.fechaInicio);
+    const entradaVencida = !!evento && terminoElDia(evento.fechaInicio);
     const agotado = !!evento && evento.cuposDisponibles <= 0;
     const esPropio = evento?.organizadorId === usuario?.usuarioId;
     const fechaInicio = evento ? new Date(evento.fechaInicio) : null;
@@ -349,19 +350,21 @@ export default function DetalleEvento() {
                                     Estás inscrito
                                 </ThemedText>
                             </View>
-                            <Pressable
-                                accessibilityRole="button"
-                                onPress={() => setEntradaAbierta(true)}
-                                style={[styles.verEntrada, { backgroundColor: theme.text }]}>
-                                <SymbolView
-                                    name={{ ios: 'qrcode', android: 'qr_code_2', web: 'qr_code_2' }}
-                                    size={16}
-                                    tintColor={theme.surface}
-                                />
-                                <ThemedText type="smallBold" style={{ color: theme.surface }}>
-                                    Ver mi entrada
-                                </ThemedText>
-                            </Pressable>
+                            {!entradaVencida && (
+                                <Pressable
+                                    accessibilityRole="button"
+                                    onPress={() => setEntradaAbierta(true)}
+                                    style={[styles.verEntrada, { backgroundColor: theme.text }]}>
+                                    <SymbolView
+                                        name={{ ios: 'qrcode', android: 'qr_code_2', web: 'qr_code_2' }}
+                                        size={16}
+                                        tintColor={theme.surface}
+                                    />
+                                    <ThemedText type="smallBold" style={{ color: theme.surface }}>
+                                        Ver mi entrada
+                                    </ThemedText>
+                                </Pressable>
+                            )}
                         </View>
                     ) : mensajeEstado ? (
                         <View style={[styles.boton, { backgroundColor: theme.disabledButton }]}>
