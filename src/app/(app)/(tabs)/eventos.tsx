@@ -78,7 +78,7 @@ export default function CatalogoEventos() {
                         <View style={styles.lista}>
                             {eventosOrdenados.map((evento) => (
                                 <TarjetaEvento key={evento.id} evento={evento}>
-                                    <Link href={`/eventos/${evento.id}`} asChild>
+                                    <Link href={`/evento/${evento.id}`} asChild>
                                         <Pressable
                                             accessibilityRole="link"
                                             accessibilityLabel={`Ver detalle de ${evento.titulo}`}

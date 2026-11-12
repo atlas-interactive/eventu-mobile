@@ -1,11 +1,6 @@
 import { api } from '@/api/client';
 import type { Inscripcion, RespuestaCancelacionInscripcion } from '@/types/inscripcion';
 
-interface InscripcionDelUsuario {
-    eventoId: number;
-    estado: string;
-}
-
 export interface RespuestaInscripcion {
     mensaje: string;
     inscripcionId: number;
@@ -13,28 +8,18 @@ export interface RespuestaInscripcion {
 }
 
 // El eventoId va como parámetro de la URL, no en el cuerpo
-export const inscribirEnEvento = async (eventoId: number): Promise<RespuestaInscripcion> =>
-    (await api.post<RespuestaInscripcion>('/inscripciones', undefined, { params: { eventoId } })).data;
-
-//Revisa si el usuario ya tiene una inscripción activa en el evento.
-export const tieneInscripcionActiva = async (eventoId: number): Promise<boolean> => {
-    const { data } = await api.get<InscripcionDelUsuario[]>('/inscripciones/mias');
+export const inscribirEnEvento = async (eventoId: number): Promise<RespuestaInscripcion> => {
+    const { data } = await api.post<RespuestaInscripcion>('/inscripciones', undefined, { params: { eventoId } });
     if (
-        !Array.isArray(data) ||
-        data.some(
-            (inscripcion) =>
-                !inscripcion ||
-                typeof inscripcion.eventoId !== 'number' ||
-                typeof inscripcion.estado !== 'string',
-        )
+        !data ||
+        typeof data.mensaje !== 'string' ||
+        typeof data.inscripcionId !== 'number' ||
+        typeof data.codigoQr !== 'string'
     ) {
-        throw new Error('La respuesta de /inscripciones/mias no es una lista válida.');
+        throw new Error('La respuesta de inscripción no contiene una entrada válida.');
     }
 
-    return data.some(
-        (inscripcion) =>
-            inscripcion.eventoId === eventoId && inscripcion.estado.toUpperCase() === 'ACTIVA',
-    );
+    return data;
 };
 
 export const listarMisInscripciones = async (): Promise<Inscripcion[]> => {
@@ -47,6 +32,8 @@ export const listarMisInscripciones = async (): Promise<Inscripcion[]> => {
                 typeof inscripcion.id !== 'number' ||
                 typeof inscripcion.eventoId !== 'number' ||
                 !['ACTIVA', 'CANCELADA'].includes(inscripcion.estado) ||
+                !(inscripcion.codigoQr === null || typeof inscripcion.codigoQr === 'string') ||
+                typeof inscripcion.fechaInscripcion !== 'string' ||
                 typeof inscripcion.eventoTitulo !== 'string' ||
                 typeof inscripcion.eventoFechaInicio !== 'string' ||
                 typeof inscripcion.eventoUbicacion !== 'string',
@@ -56,6 +43,16 @@ export const listarMisInscripciones = async (): Promise<Inscripcion[]> => {
     }
 
     return data;
+};
+
+//Busca la inscripción activa del usuario en el evento, si la tiene.
+export const obtenerInscripcionActiva = async (eventoId: number): Promise<Inscripcion | null> => {
+    const inscripciones = await listarMisInscripciones();
+    return (
+        inscripciones.find(
+            (inscripcion) => inscripcion.eventoId === eventoId && inscripcion.estado === 'ACTIVA',
+        ) ?? null
+    );
 };
 
 export const cancelarInscripcion = async (

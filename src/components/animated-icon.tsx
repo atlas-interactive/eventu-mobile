@@ -7,7 +7,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 const DURATION = 600;
 
-// Animación de entrada: muestra el logo sobre el fondo y lo desvanece al abrir la app
+// Animación de entrada muestra el logo sobre el fondo y lo desvanece al abrir la app
 export function AnimatedSplashOverlay() {
     const [animate, setAnimate] = useState(false);
     const [visible, setVisible] = useState(true);
