@@ -13,6 +13,8 @@ export interface Evento {
     organizadorNombre: string;
     categoriaId: number;
     categoriaNombre: string;
+    // Indica si el evento entrega certificado de asistencia
+    certificable?: boolean;
 }
 
 export interface FiltrosEvento {

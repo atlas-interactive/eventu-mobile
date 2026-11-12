@@ -1,10 +1,10 @@
 import { SymbolView } from 'expo-symbols';
 import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { mensajeDeError } from '@/api/mensajeDeError';
 import { BotonCerrarSesion } from '@/components/boton-cerrar-sesion';
+import { EncabezadoApp } from '@/components/encabezado-app';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconoAviso } from '@/components/ui/icono-aviso';
@@ -122,19 +122,17 @@ export default function Perfil() {
 
     return (
         <ThemedView style={styles.flex}>
-            <SafeAreaView edges={['top']} style={{ backgroundColor: theme.surface }}>
-                <View style={[styles.encabezado, { borderBottomColor: theme.border }]}>
-                    <ThemedText type="smallBold" style={styles.tituloPagina}>
-                        Mi perfil
-                    </ThemedText>
-                    <BotonCerrarSesion />
-                </View>
-            </SafeAreaView>
+            <EncabezadoApp>
+                <BotonCerrarSesion />
+            </EncabezadoApp>
             <KeyboardAvoidingView style={styles.flex} behavior="padding">
                 <ScrollView
                     contentInsetAdjustmentBehavior="automatic"
                     keyboardShouldPersistTaps="handled"
                     contentContainerStyle={styles.contenido}>
+                    <ThemedText type="smallBold" accessibilityRole="header" style={styles.tituloPagina}>
+                        Mi perfil
+                    </ThemedText>
                     {!!mensajeExito && (
                         <View
                             accessibilityRole="alert"
@@ -302,16 +300,7 @@ export default function Perfil() {
 
 const styles = StyleSheet.create({
     flex: { flex: 1 },
-    encabezado: {
-        minHeight: 52,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderBottomWidth: 1,
-        paddingLeft: Spacing.three,
-        paddingRight: Spacing.two,
-    },
-    tituloPagina: { fontSize: 18, lineHeight: 26 },
+    tituloPagina: { fontSize: 22, lineHeight: 30 },
     contenido: { padding: Spacing.three, gap: Spacing.three },
     mensaje: {
         flexDirection: 'row',

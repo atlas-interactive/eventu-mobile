@@ -1,6 +1,6 @@
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { mensajeDeError } from '@/api/mensajeDeError';
 import { ThemedText } from '@/components/themed-text';
@@ -109,7 +109,8 @@ export function DesactivarCuenta() {
                     animationType="fade"
                     statusBarTranslucent
                     onRequestClose={cerrarModalDesactivacion}>
-                    <View style={styles.contenedor}>
+                    {/* La tarjeta sube cuando aparece el teclado para que se vean los botones */}
+                    <KeyboardAvoidingView behavior="padding" style={styles.contenedor}>
                         <Pressable
                             accessibilityLabel="Cerrar"
                             onPress={cerrarModalDesactivacion}
@@ -179,7 +180,7 @@ export function DesactivarCuenta() {
                                 <ThemedText type="small">Volver</ThemedText>
                             </Pressable>
                         </View>
-                    </View>
+                    </KeyboardAvoidingView>
                 </Modal>
             )}
         </View>

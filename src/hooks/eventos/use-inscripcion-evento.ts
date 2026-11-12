@@ -2,48 +2,48 @@ import { useEffect, useState } from 'react';
 
 import { mensajeDeError } from '@/api/mensajeDeError';
 import {
+    cancelarInscripcion,
     inscribirEnEvento,
-    tieneInscripcionActiva,
+    obtenerInscripcionActiva,
 } from '@/features/inscripciones/services/inscripcion-service';
-
-interface Verificacion {
-    para: number;
-    intento: number;
-    yaInscrito: boolean;
-    error: string;
-}
+import type { Evento } from '@/types/evento';
+import type { Inscripcion } from '@/types/inscripcion';
 
 export function useInscripcionEvento(eventoId: number, habilitado = true) {
-    const [verificacion, setVerificacion] = useState<Verificacion | null>(null);
     const [intentoVerificacion, setIntentoVerificacion] = useState(0);
+    const claveVerificacion = `${eventoId}:${habilitado}:${intentoVerificacion}`;
+    const identificadorValido = habilitado && Number.isSafeInteger(eventoId) && eventoId > 0;
+    const [resultadoVerificacion, setResultadoVerificacion] = useState<{
+        clave: string;
+        inscripcion: Inscripcion | null;
+        error: string;
+    } | null>(null);
+    // Solo cuenta la verificación hecha para este evento y este intento
+    const resultadoActual = resultadoVerificacion?.clave === claveVerificacion ? resultadoVerificacion : null;
+    const verificando = identificadorValido && !resultadoActual;
+    const inscripcionActiva = resultadoActual?.inscripcion ?? null;
+    const yaInscrito = inscripcionActiva !== null;
+    const errorVerificacion = resultadoActual?.error ?? '';
     const [inscribiendo, setInscribiendo] = useState(false);
     const [error, setError] = useState('');
     const [inscripcionRealizada, setInscripcionRealizada] = useState(false);
-
-    const valido = habilitado && Number.isSafeInteger(eventoId) && eventoId > 0;
-    // Solo cuenta la verificación hecha para este evento y este intento
-    const actual =
-        verificacion?.para === eventoId && verificacion.intento === intentoVerificacion ? verificacion : null;
-    const verificando = valido && !actual;
-    const yaInscrito = valido && !!actual?.yaInscrito;
-    const errorVerificacion = valido ? (actual?.error ?? '') : '';
+    const [cancelando, setCancelando] = useState(false);
+    const [errorCancelacion, setErrorCancelacion] = useState('');
 
     useEffect(() => {
-        if (!valido) return;
+        if (!identificadorValido) return;
         let vigente = true;
-        tieneInscripcionActiva(eventoId)
+        obtenerInscripcionActiva(eventoId)
             .then((activa) => {
-                if (vigente) {
-                    setVerificacion({ para: eventoId, intento: intentoVerificacion, yaInscrito: activa, error: '' });
-                }
+                if (!vigente) return;
+                setResultadoVerificacion({ clave: claveVerificacion, inscripcion: activa, error: '' });
             })
             .catch((err: unknown) => {
                 console.error('No se pudo verificar la inscripción al evento:', err);
                 if (vigente) {
-                    setVerificacion({
-                        para: eventoId,
-                        intento: intentoVerificacion,
-                        yaInscrito: false,
+                    setResultadoVerificacion({
+                        clave: claveVerificacion,
+                        inscripcion: null,
                         error: mensajeDeError(err),
                     });
                 }
@@ -52,33 +52,69 @@ export function useInscripcionEvento(eventoId: number, habilitado = true) {
         return () => {
             vigente = false;
         };
-    }, [eventoId, valido, intentoVerificacion]);
+    }, [eventoId, claveVerificacion, identificadorValido]);
 
     const reintentarVerificacion = () => setIntentoVerificacion((intento) => intento + 1);
 
-    const inscribir = async () => {
-        if (verificando || errorVerificacion || yaInscrito || inscribiendo || inscripcionRealizada) return;
+    const inscribir = async (evento: Evento): Promise<boolean> => {
+        if (verificando || errorVerificacion || yaInscrito || inscribiendo || inscripcionRealizada) return false;
         setInscribiendo(true);
         setError('');
         try {
-            await inscribirEnEvento(eventoId);
+            const respuesta = await inscribirEnEvento(eventoId);
+            const nuevaInscripcion: Inscripcion = {
+                id: respuesta.inscripcionId,
+                estado: 'ACTIVA',
+                codigoQr: respuesta.codigoQr,
+                fechaInscripcion: new Date().toISOString(),
+                eventoId,
+                eventoTitulo: evento.titulo,
+                eventoFechaInicio: evento.fechaInicio,
+                eventoUbicacion: evento.ubicacion,
+                eventoEstado: evento.estado,
+            };
+            setResultadoVerificacion({ clave: claveVerificacion, inscripcion: nuevaInscripcion, error: '' });
             setInscripcionRealizada(true);
+            return true;
         } catch (err: unknown) {
             console.error('No se pudo realizar la inscripción al evento:', err);
             setError(mensajeDeError(err));
+            return false;
         } finally {
             setInscribiendo(false);
+        }
+    };
+
+    const cancelarInscripcionActiva = async (): Promise<boolean> => {
+        if (!inscripcionActiva || cancelando) return false;
+        setCancelando(true);
+        setErrorCancelacion('');
+        try {
+            await cancelarInscripcion(inscripcionActiva.id);
+            setResultadoVerificacion({ clave: claveVerificacion, inscripcion: null, error: '' });
+            setInscripcionRealizada(false);
+            return true;
+        } catch (err: unknown) {
+            console.error('No se pudo cancelar la inscripción al evento:', err);
+            setErrorCancelacion(mensajeDeError(err));
+            return false;
+        } finally {
+            setCancelando(false);
         }
     };
 
     return {
         verificando,
         yaInscrito,
+        inscripcionActiva,
         errorVerificacion,
         reintentarVerificacion,
         inscribiendo,
         error,
         inscripcionRealizada,
-        inscribir: () => inscribir(),
+        cancelarInscripcionActiva,
+        cancelando,
+        errorCancelacion,
+        inscribir,
     };
 }

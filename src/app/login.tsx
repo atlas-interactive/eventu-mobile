@@ -6,6 +6,7 @@ import {
     Pressable,
     ScrollView,
     StyleSheet,
+    Text,
     TextInput,
     View,
 } from 'react-native';
@@ -19,8 +20,12 @@ import { IconoAviso } from '@/components/ui/icono-aviso';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { useTheme } from '@/hooks/use-theme';
+import { AvisoCuentaReactivada } from '@/features/auth/components/aviso-cuenta-reactivada';
 import { login } from '@/features/auth/services/auth-service';
 import { esAdministrador } from '@/features/sesion/sesion';
+import type { LoginResponse } from '@/types/auth';
+
+const correoInstitucionalRegex = /^[a-zA-Z0-9._%+-]+@unillanos\.edu\.co$/;
 
 export default function LoginScreen() {
     const theme = useTheme();
@@ -30,11 +35,20 @@ export default function LoginScreen() {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [respuestaPendiente, setRespuestaPendiente] = useState<LoginResponse | null>(null);
 
     // Valida los campos, consulta el backend y guarda la sesión
     const handleLogin = async () => {
         if (!correo.trim() || !password) {
             setError('Ingresa tu correo y contraseña.');
+            return;
+        }
+        if (!correoInstitucionalRegex.test(correo.trim())) {
+            setError('Debe ingresar un correo institucional válido.');
+            return;
+        }
+        if (password.length < 8 || password.length > 72) {
+            setError('La contraseña debe tener entre 8 y 72 caracteres.');
             return;
         }
         setError(null);
@@ -43,6 +57,11 @@ export default function LoginScreen() {
             const datos = await login({ correo: correo.trim(), password });
             if (esAdministrador(datos)) {
                 setError('Esta app es para estudiantes y organizadores. Ingresa desde el panel web de EventU.');
+                return;
+            }
+            // Si la cuenta estaba desactivada, primero se avisa que se reactivó
+            if (datos.cuentaReactivada) {
+                setRespuestaPendiente(datos);
                 return;
             }
             await iniciarSesion(datos);
@@ -73,10 +92,10 @@ export default function LoginScreen() {
                             contentFit="contain"
                             accessible={false}
                         />
-                        <ThemedText type="subtitle" style={styles.centered}>
-                            EventU
+                        <ThemedText type="smallBold" accessibilityLabel="EventU" style={[styles.centered, styles.marca]}>
+                            Event<Text style={{ color: theme.primary }}>U</Text>
                         </ThemedText>
-                        <ThemedText type="subtitle" style={styles.centered}>
+                        <ThemedText type="smallBold" style={[styles.centered, styles.titulo]}>
                             Inicia sesión
                         </ThemedText>
                         <ThemedText
@@ -96,6 +115,21 @@ export default function LoginScreen() {
                                 <IconoAviso tipo="exito" style={styles.iconoAlerta} />
                                 <ThemedText type="small" themeColor="success" style={styles.textoAlerta}>
                                     {avisoLogin}
+                                </ThemedText>
+                            </View>
+                        )}
+
+                        {error && (
+                            <View
+                                accessibilityRole="alert"
+                                accessibilityLiveRegion="polite"
+                                style={[
+                                    styles.alertaError,
+                                    { backgroundColor: theme.errorBackground, borderColor: theme.softRedBackground },
+                                ]}>
+                                <IconoAviso tipo="error" style={styles.iconoAlerta} />
+                                <ThemedText type="small" themeColor="error" style={styles.textoAlerta}>
+                                    {error}
                                 </ThemedText>
                             </View>
                         )}
@@ -136,21 +170,6 @@ export default function LoginScreen() {
                             />
                         </View>
 
-                        {error && (
-                            <View
-                                accessibilityRole="alert"
-                                accessibilityLiveRegion="polite"
-                                style={[
-                                    styles.alertaError,
-                                    { backgroundColor: theme.errorBackground, borderColor: theme.softRedBackground },
-                                ]}>
-                                <IconoAviso tipo="error" style={styles.iconoAlerta} />
-                                <ThemedText type="small" themeColor="error" style={styles.textoAlerta}>
-                                    {error}
-                                </ThemedText>
-                            </View>
-                        )}
-
                         <Pressable
                             onPress={handleLogin}
                             disabled={loading}
@@ -173,6 +192,9 @@ export default function LoginScreen() {
                     </ScrollView>
                 </KeyboardAvoidingView>
             </SafeAreaView>
+            {respuestaPendiente && (
+                <AvisoCuentaReactivada onContinuar={() => iniciarSesion(respuestaPendiente)} />
+            )}
         </ThemedView>
     );
 }
@@ -182,6 +204,8 @@ const styles = StyleSheet.create({
     logo: { width: 42, height: 41, alignSelf: 'center' },
     field: { gap: Spacing.two },
     centered: { textAlign: 'center' },
+    marca: { fontSize: 32, lineHeight: 42 },
+    titulo: { fontSize: 20, lineHeight: 28 },
     alertaError: {
         flexDirection: 'row',
         alignItems: 'flex-start',
