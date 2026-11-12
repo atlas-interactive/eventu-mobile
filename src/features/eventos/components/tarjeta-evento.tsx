@@ -17,6 +17,8 @@ const formatoFecha = new Intl.DateTimeFormat('es-CO', {
 
 interface TarjetaEventoProps {
     evento: Evento;
+    // Marca los eventos que organiza quien tiene la sesión
+    esPropio?: boolean;
     children?: ReactNode;
 }
 
@@ -26,7 +28,7 @@ const porcentajeOcupado = (evento: Evento): number => {
     return Math.max(0, Math.min(100, (ocupados / evento.cuposMaximos) * 100));
 };
 
-export function TarjetaEvento({ evento, children }: TarjetaEventoProps) {
+export function TarjetaEvento({ evento, esPropio = false, children }: TarjetaEventoProps) {
     const theme = useTheme();
     const estaCancelado = evento.estado.toUpperCase() === 'CANCELADO';
     const ocupados =
@@ -43,6 +45,13 @@ export function TarjetaEvento({ evento, children }: TarjetaEventoProps) {
                         type="small"
                         style={[styles.categoria, { backgroundColor: theme.categoryBackground, color: theme.category }]}>
                         {evento.categoriaNombre}
+                    </ThemedText>
+                )}
+                {esPropio && (
+                    <ThemedText
+                        type="smallBold"
+                        style={[styles.categoria, { backgroundColor: theme.softRedBackground, color: theme.primary }]}>
+                        Tu evento
                     </ThemedText>
                 )}
                 <View style={styles.estado}>

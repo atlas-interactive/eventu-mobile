@@ -7,6 +7,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Skeleton, SkeletonEstado } from '@/components/ui/skeleton';
 import { Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/auth-context';
 import { FiltrosEventos } from '@/features/eventos/components/filtros-eventos';
 import { TarjetaEvento } from '@/features/eventos/components/tarjeta-evento';
 import { ordenarEventos, type OrdenEventos } from '@/features/eventos/evento-ordenamiento';
@@ -16,8 +17,16 @@ import { useTheme } from '@/hooks/use-theme';
 export default function CatalogoEventos() {
     const catalogo = useCatalogoEventos();
     const theme = useTheme();
+    const { usuario } = useAuth();
     const [orden, setOrden] = useState<OrdenEventos>('fecha-proxima');
-    const eventosOrdenados = ordenarEventos(catalogo.eventos, orden);
+    const [soloMisEventos, setSoloMisEventos] = useState(false);
+    const esOrganizador = usuario?.rol.toUpperCase() === 'ORGANIZADOR';
+    const esPropio = (organizadorId: number) => organizadorId === usuario?.usuarioId;
+    // El filtro de eventos propios se aplica aquí, sin pedir nada nuevo al backend
+    const eventosOrdenados = ordenarEventos(
+        soloMisEventos ? catalogo.eventos.filter(({ organizadorId }) => esPropio(organizadorId)) : catalogo.eventos,
+        orden,
+    );
 
     return (
         <ThemedView style={styles.flex}>
@@ -43,6 +52,25 @@ export default function CatalogoEventos() {
                     orden={orden}
                     onOrdenChange={setOrden}
                 />
+                {esOrganizador && (
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: soloMisEventos }}
+                        hitSlop={6}
+                        onPress={() => setSoloMisEventos(!soloMisEventos)}
+                        style={[
+                            styles.misEventos,
+                            soloMisEventos
+                                ? { backgroundColor: theme.softRedBackground, borderColor: theme.primary }
+                                : { backgroundColor: theme.surface, borderColor: theme.border },
+                        ]}>
+                        <ThemedText
+                            type="smallBold"
+                            style={[styles.textoMisEventos, { color: soloMisEventos ? theme.primary : theme.text }]}>
+                            Solo mis eventos
+                        </ThemedText>
+                    </Pressable>
+                )}
                 {!!catalogo.errorEventos && (
                     <ThemedText type="small" themeColor="error" accessibilityRole="alert">
                         {catalogo.errorEventos}
@@ -64,11 +92,13 @@ export default function CatalogoEventos() {
                 {!catalogo.cargando &&
                     !catalogo.errorEventos &&
                     !catalogo.rangoFechasInvalido &&
-                    catalogo.eventos.length === 0 && (
+                    eventosOrdenados.length === 0 && (
                         <ThemedText type="small" themeColor="textSecondary">
-                            {catalogo.hayFiltrosActivos
-                                ? 'No se encontraron eventos con esos filtros.'
-                                : 'No hay eventos disponibles por ahora.'}
+                            {soloMisEventos && !catalogo.hayFiltrosActivos
+                                ? 'Aún no tienes eventos creados. Créalos desde el panel web de EventU.'
+                                : catalogo.hayFiltrosActivos
+                                  ? 'No se encontraron eventos con esos filtros.'
+                                  : 'No hay eventos disponibles por ahora.'}
                         </ThemedText>
                     )}
                 {!catalogo.cargando &&
@@ -77,7 +107,7 @@ export default function CatalogoEventos() {
                     eventosOrdenados.length > 0 && (
                         <View style={styles.lista}>
                             {eventosOrdenados.map((evento) => (
-                                <TarjetaEvento key={evento.id} evento={evento}>
+                                <TarjetaEvento key={evento.id} evento={evento} esPropio={esPropio(evento.organizadorId)}>
                                     <Link href={`/evento/${evento.id}`} asChild>
                                         <Pressable
                                             accessibilityRole="link"
@@ -101,6 +131,15 @@ const styles = StyleSheet.create({
     catalogo: { padding: Spacing.three, gap: 12 },
     tituloPagina: { fontSize: 22, lineHeight: 30 },
     lista: { gap: 12 },
+    misEventos: {
+        minHeight: 32,
+        alignSelf: 'flex-start',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderRadius: 9999,
+        paddingHorizontal: 12,
+    },
+    textoMisEventos: { fontSize: 12, lineHeight: 16 },
     tarjetaCarga: { gap: Spacing.two, borderWidth: 1, borderRadius: 8, padding: Spacing.three },
     detalle: {
         minHeight: 36,
