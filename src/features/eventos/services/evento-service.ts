@@ -18,6 +18,15 @@ export const listarEventos = async (filtros: FiltrosEvento = {}): Promise<Evento
     return data;
 };
 
+// Eventos creados por el organizador en cualquier estado, también los que ya iniciaron
+export const listarMisEventos = async (filtros: FiltrosEvento = {}): Promise<Evento[]> => {
+    const { data } = await api.get<Evento[]>('/eventos/mios', { params: obtenerParametros(filtros) });
+    if (!Array.isArray(data)) {
+        throw new Error('La respuesta de /eventos/mios no es una lista.');
+    }
+    return data;
+};
+
 //Para obtener los detalles de un evento específico
 export const obtenerEvento = async (id: number): Promise<Evento> => {
     const { data } = await api.get<Evento>(`/eventos/${id}`);

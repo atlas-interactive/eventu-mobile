@@ -31,6 +31,10 @@ const porcentajeOcupado = (evento: Evento): number => {
 export function TarjetaEvento({ evento, esPropio = false, children }: TarjetaEventoProps) {
     const theme = useTheme();
     const estaCancelado = evento.estado.toUpperCase() === 'CANCELADO';
+    // Solo el organizador ve sus eventos que ya iniciaron
+    const yaInicio = !estaCancelado && new Date(evento.fechaInicio).getTime() <= new Date().getTime();
+    const textoEstado = estaCancelado ? 'Cancelado' : yaInicio ? 'Finalizado' : 'Publicado';
+    const colorEstado = estaCancelado || yaInicio ? theme.textSecondary : theme.success;
     const ocupados =
         evento.cuposMaximos > 0
             ? Math.max(0, Math.min(evento.cuposMaximos, evento.cuposMaximos - evento.cuposDisponibles))
@@ -55,13 +59,9 @@ export function TarjetaEvento({ evento, esPropio = false, children }: TarjetaEve
                     </ThemedText>
                 )}
                 <View style={styles.estado}>
-                    <View
-                        style={[styles.punto, { backgroundColor: estaCancelado ? theme.textSecondary : theme.success }]}
-                    />
-                    <ThemedText
-                        type="smallBold"
-                        style={[styles.textoEstado, { color: estaCancelado ? theme.textSecondary : theme.success }]}>
-                        {estaCancelado ? 'Cancelado' : 'Publicado'}
+                    <View style={[styles.punto, { backgroundColor: colorEstado }]} />
+                    <ThemedText type="smallBold" style={[styles.textoEstado, { color: colorEstado }]}>
+                        {textoEstado}
                     </ThemedText>
                 </View>
             </View>

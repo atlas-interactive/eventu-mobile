@@ -15,16 +15,18 @@ import { useCatalogoEventos } from '@/hooks/eventos/use-catalogo-eventos';
 import { useTheme } from '@/hooks/use-theme';
 
 export default function CatalogoEventos() {
-    const catalogo = useCatalogoEventos();
     const theme = useTheme();
     const { usuario } = useAuth();
     const [orden, setOrden] = useState<OrdenEventos>('fecha-proxima');
     const [soloMisEventos, setSoloMisEventos] = useState(false);
+    const catalogo = useCatalogoEventos(soloMisEventos);
     const esOrganizador = usuario?.rol.toUpperCase() === 'ORGANIZADOR';
     const esPropio = (organizadorId: number) => organizadorId === usuario?.usuarioId;
-    // El filtro de eventos propios se aplica aquí, sin pedir nada nuevo al backend
+    // En los eventos propios no se muestran los cancelados, ahí ya no hay asistencia que registrar
     const eventosOrdenados = ordenarEventos(
-        soloMisEventos ? catalogo.eventos.filter(({ organizadorId }) => esPropio(organizadorId)) : catalogo.eventos,
+        soloMisEventos
+            ? catalogo.eventos.filter(({ estado }) => estado.toUpperCase() !== 'CANCELADO')
+            : catalogo.eventos,
         orden,
     );
 
