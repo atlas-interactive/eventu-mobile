@@ -1,6 +1,7 @@
 import '@/global.css';
 
 import { Platform } from 'react-native';
+import { initialWindowMetrics } from 'react-native-safe-area-context';
 
 export const Colors = {
     light: {
@@ -103,4 +104,10 @@ export const Spacing = {
 } as const;
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+
+// Espacio al final de las listas de las pestañas para que la barra flotante no tape el contenido
+export const EspacioFinalPestanas =
+    Platform.OS === 'ios'
+        ? (initialWindowMetrics?.insets.bottom ?? 0) + BottomTabInset + Spacing.three
+        : Spacing.three;
 export const MaxContentWidth = 800;

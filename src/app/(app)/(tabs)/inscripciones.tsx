@@ -6,7 +6,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconoAviso } from '@/components/ui/icono-aviso';
 import { Skeleton, SkeletonEstado } from '@/components/ui/skeleton';
-import { Spacing } from '@/constants/theme';
+import { EspacioFinalPestanas, Spacing } from '@/constants/theme';
 import { CalendarioInscripciones } from '@/features/inscripciones/components/calendario-inscripciones';
 import { ConfirmarCancelacionInscripcion } from '@/features/inscripciones/components/confirmar-cancelacion-inscripcion';
 import { useMisInscripciones, type FiltroInscripcion } from '@/hooks/inscripciones/use-mis-inscripciones';
@@ -28,8 +28,7 @@ export default function MisInscripciones() {
             <EncabezadoApp />
             <ScrollView
                 ref={scrollRef}
-                contentInsetAdjustmentBehavior="automatic"
-                contentContainerStyle={styles.contenido}>
+                contentContainerStyle={[styles.contenido, { paddingBottom: EspacioFinalPestanas }]}>
                 <ThemedText type="smallBold" accessibilityRole="header" style={styles.titulo}>
                     Mis inscripciones
                 </ThemedText>

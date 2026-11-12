@@ -6,7 +6,7 @@ import { EncabezadoApp } from '@/components/encabezado-app';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Skeleton, SkeletonEstado } from '@/components/ui/skeleton';
-import { Spacing } from '@/constants/theme';
+import { EspacioFinalPestanas, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { FiltrosEventos } from '@/features/eventos/components/filtros-eventos';
 import { TarjetaEvento } from '@/features/eventos/components/tarjeta-evento';
@@ -34,9 +34,8 @@ export default function CatalogoEventos() {
         <ThemedView style={styles.flex}>
             <EncabezadoApp />
             <ScrollView
-                contentInsetAdjustmentBehavior="automatic"
                 keyboardShouldPersistTaps="handled"
-                contentContainerStyle={styles.catalogo}>
+                contentContainerStyle={[styles.catalogo, { paddingBottom: EspacioFinalPestanas }]}>
                 <ThemedText type="smallBold" accessibilityRole="header" style={styles.tituloPagina}>
                     Eventos en campus
                 </ThemedText>
