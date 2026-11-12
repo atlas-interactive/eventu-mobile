@@ -2,6 +2,7 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { mensajeDeError } from '@/api/mensajeDeError';
 import { EncabezadoApp } from '@/components/encabezado-app';
@@ -28,6 +29,7 @@ const iniciales = (nombre: string) =>
 export default function InscritosEvento() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const theme = useTheme();
+    const insets = useSafeAreaInsets();
     const idEvento = Number(id);
     const idValido = Number.isSafeInteger(idEvento) && idEvento > 0;
 
@@ -219,6 +221,32 @@ export default function InscritosEvento() {
                     </>
                 )}
             </ScrollView>
+
+            {!!datos && (
+                <View
+                    style={[
+                        styles.barraInferior,
+                        {
+                            backgroundColor: theme.surface,
+                            borderTopColor: theme.border,
+                            paddingBottom: Math.max(insets.bottom, Spacing.three),
+                        },
+                    ]}>
+                    <Pressable
+                        accessibilityRole="button"
+                        onPress={() => router.push(`/escanear/${idEvento}`)}
+                        style={[styles.botonEscanear, { backgroundColor: theme.primary }]}>
+                        <SymbolView
+                            name={{ ios: 'camera.fill', android: 'photo_camera', web: 'photo_camera' }}
+                            size={18}
+                            tintColor={theme.onPrimary}
+                        />
+                        <ThemedText type="smallBold" themeColor="onPrimary">
+                            Escanear QR de entrada
+                        </ThemedText>
+                    </Pressable>
+                </View>
+            )}
         </ThemedView>
     );
 }
@@ -252,6 +280,15 @@ const styles = StyleSheet.create({
     lista: { borderWidth: 1, borderRadius: 8, overflow: 'hidden' },
     fila: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12 },
     avatar: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+    barraInferior: { borderTopWidth: 1, paddingHorizontal: Spacing.three, paddingTop: 12 },
+    botonEscanear: {
+        minHeight: 48,
+        borderRadius: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: Spacing.two,
+    },
     estado: {
         borderRadius: 4,
         paddingHorizontal: 8,

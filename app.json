@@ -35,7 +35,13 @@
       ],
       "expo-secure-store",
       "expo-font",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "EventU usa la cámara para escanear los códigos QR de entrada a los eventos."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

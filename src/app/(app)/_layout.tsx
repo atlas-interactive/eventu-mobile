@@ -7,6 +7,7 @@ export default function AppLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="evento/[id]" />
             <Stack.Screen name="inscritos/[id]" />
+            <Stack.Screen name="escanear/[id]" />
         </Stack>
     );
 }
