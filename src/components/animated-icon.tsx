@@ -5,7 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { Easing, Keyframe } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
-const DURATION = 600;
+const DURATION = 2000;
 
 // Animación de entrada muestra el logo sobre el fondo y lo desvanece al abrir la app
 export function AnimatedSplashOverlay() {
@@ -19,10 +19,10 @@ export function AnimatedSplashOverlay() {
             transform: [{ scale: 1 }],
             opacity: 1,
         },
-        20: {
+        40: {
             opacity: 1,
         },
-        70: {
+        80: {
             opacity: 0,
             easing: Easing.elastic(0.7),
         },
@@ -33,7 +33,7 @@ export function AnimatedSplashOverlay() {
         },
     });
 
-    const image = <Image style={styles.image} source={require('@/assets/images/expo-logo.png')} />;
+    const image = <Image style={styles.image} source={require('@/assets/images/logo-unillanos.png')} />;
 
     return animate ? (
         <Animated.View
@@ -61,12 +61,12 @@ export function AnimatedSplashOverlay() {
 
 const styles = StyleSheet.create({
     image: {
-        width: 76,
-        height: 71,
+        width: 110,
+        height: 108,
     },
     splashOverlay: {
         ...StyleSheet.absoluteFill,
-        backgroundColor: '#208AEF',
+        backgroundColor: '#ffffff',
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 1000,

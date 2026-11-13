@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "eventu-mobile",
+    "name": "EventU",
     "slug": "eventu-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,13 +8,14 @@
     "scheme": "eventumobile",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "co.edu.unillanos.eventu"
     },
     "android": {
+      "package": "co.edu.unillanos.eventu",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#b91525",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
@@ -28,9 +29,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#ffffff",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 110
         }
       ],
       "expo-secure-store",
