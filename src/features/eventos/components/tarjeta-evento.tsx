@@ -17,6 +17,8 @@ const formatoFecha = new Intl.DateTimeFormat('es-CO', {
 
 interface TarjetaEventoProps {
     evento: Evento;
+    // Marca los eventos que organiza quien tiene la sesión
+    esPropio?: boolean;
     children?: ReactNode;
 }
 
@@ -26,9 +28,13 @@ const porcentajeOcupado = (evento: Evento): number => {
     return Math.max(0, Math.min(100, (ocupados / evento.cuposMaximos) * 100));
 };
 
-export function TarjetaEvento({ evento, children }: TarjetaEventoProps) {
+export function TarjetaEvento({ evento, esPropio = false, children }: TarjetaEventoProps) {
     const theme = useTheme();
     const estaCancelado = evento.estado.toUpperCase() === 'CANCELADO';
+    // Solo el organizador ve sus eventos que ya iniciaron
+    const yaInicio = !estaCancelado && new Date(evento.fechaInicio).getTime() <= new Date().getTime();
+    const textoEstado = estaCancelado ? 'Cancelado' : yaInicio ? 'Finalizado' : 'Publicado';
+    const colorEstado = estaCancelado || yaInicio ? theme.textSecondary : theme.success;
     const ocupados =
         evento.cuposMaximos > 0
             ? Math.max(0, Math.min(evento.cuposMaximos, evento.cuposMaximos - evento.cuposDisponibles))
@@ -45,14 +51,17 @@ export function TarjetaEvento({ evento, children }: TarjetaEventoProps) {
                         {evento.categoriaNombre}
                     </ThemedText>
                 )}
-                <View style={styles.estado}>
-                    <View
-                        style={[styles.punto, { backgroundColor: estaCancelado ? theme.textSecondary : theme.success }]}
-                    />
+                {esPropio && (
                     <ThemedText
                         type="smallBold"
-                        style={[styles.textoEstado, { color: estaCancelado ? theme.textSecondary : theme.success }]}>
-                        {estaCancelado ? 'Cancelado' : 'Publicado'}
+                        style={[styles.categoria, { backgroundColor: theme.softRedBackground, color: theme.primary }]}>
+                        Tu evento
+                    </ThemedText>
+                )}
+                <View style={styles.estado}>
+                    <View style={[styles.punto, { backgroundColor: colorEstado }]} />
+                    <ThemedText type="smallBold" style={[styles.textoEstado, { color: colorEstado }]}>
+                        {textoEstado}
                     </ThemedText>
                 </View>
             </View>

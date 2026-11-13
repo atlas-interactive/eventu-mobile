@@ -17,6 +17,15 @@ export interface Evento {
     certificable?: boolean;
 }
 
+export interface InscritoEvento {
+    inscripcionId: number;
+    usuarioId: number;
+    nombre: string;
+    correo: string;
+    fechaInscripcion: string;
+    asistio: boolean;
+}
+
 export interface FiltrosEvento {
     categoriaId?: number;
     fechaDesde?: string;

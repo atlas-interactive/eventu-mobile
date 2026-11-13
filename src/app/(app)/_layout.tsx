@@ -6,6 +6,8 @@ export default function AppLayout() {
         <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="evento/[id]" />
+            <Stack.Screen name="inscritos/[id]" />
+            <Stack.Screen name="escanear/[id]" />
         </Stack>
     );
 }

@@ -313,7 +313,21 @@ export default function DetalleEvento() {
                         </ThemedText>
                     )}
 
-                    {inscripcion.yaInscrito ? (
+                    {esPropio ? (
+                        <Pressable
+                            accessibilityRole="button"
+                            onPress={() => router.push(`/inscritos/${evento.id}`)}
+                            style={[styles.boton, styles.botonIcono, { backgroundColor: theme.primary }]}>
+                            <SymbolView
+                                name={{ ios: 'person.2', android: 'group', web: 'group' }}
+                                size={18}
+                                tintColor={theme.onPrimary}
+                            />
+                            <ThemedText type="smallBold" themeColor="onPrimary">
+                                Inscritos y asistencia
+                            </ThemedText>
+                        </Pressable>
+                    ) : inscripcion.yaInscrito ? (
                         <View style={styles.filaBarra}>
                             <View style={styles.inscrito}>
                                 <SymbolView
@@ -468,4 +482,5 @@ const styles = StyleSheet.create({
         paddingHorizontal: Spacing.three,
     },
     botonVolver: { alignSelf: 'center' },
+    botonIcono: { flexDirection: 'row', gap: Spacing.two },
 });
