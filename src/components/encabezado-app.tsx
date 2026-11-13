@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
@@ -16,9 +16,11 @@ export function EncabezadoApp({ children }: EncabezadoAppProps) {
     const theme = useTheme();
     // El alto de la barra de estado se toma del celular, no de la posición de la pantalla
     const insets = useSafeAreaInsets();
+    // Dentro de las pestañas el borde puede llegar en 0 justo después del login
+    const altoBarra = Math.max(insets.top, initialWindowMetrics?.insets.top ?? 0);
 
     return (
-        <View style={{ backgroundColor: theme.surface, paddingTop: insets.top }}>
+        <View style={{ backgroundColor: theme.surface, paddingTop: altoBarra }}>
             <View style={[styles.barra, { borderBottomColor: theme.border }]}>
                 <View style={styles.marca}>
                     <Image

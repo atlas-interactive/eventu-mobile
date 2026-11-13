@@ -9,7 +9,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconoAviso } from '@/components/ui/icono-aviso';
 import { Skeleton, SkeletonEstado } from '@/components/ui/skeleton';
-import { Spacing } from '@/constants/theme';
+import { EspacioFinalPestanas, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { CambiarContrasena } from '@/features/perfil/components/cambiar-contrasena';
 import { DesactivarCuenta } from '@/features/perfil/components/desactivar-cuenta';
@@ -127,9 +127,8 @@ export default function Perfil() {
             </EncabezadoApp>
             <KeyboardAvoidingView style={styles.flex} behavior="padding">
                 <ScrollView
-                    contentInsetAdjustmentBehavior="automatic"
                     keyboardShouldPersistTaps="handled"
-                    contentContainerStyle={styles.contenido}>
+                    contentContainerStyle={[styles.contenido, { paddingBottom: EspacioFinalPestanas }]}>
                     <ThemedText type="smallBold" accessibilityRole="header" style={styles.tituloPagina}>
                         Mi perfil
                     </ThemedText>

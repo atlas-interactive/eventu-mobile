@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
+import { yaInicio as eventoYaInicio } from '@/features/eventos/evento-fechas';
 import { useTheme } from '@/hooks/use-theme';
 import type { Evento } from '@/types/evento';
 
@@ -32,7 +33,7 @@ export function TarjetaEvento({ evento, esPropio = false, children }: TarjetaEve
     const theme = useTheme();
     const estaCancelado = evento.estado.toUpperCase() === 'CANCELADO';
     // Solo el organizador ve sus eventos que ya iniciaron
-    const yaInicio = !estaCancelado && new Date(evento.fechaInicio).getTime() <= new Date().getTime();
+    const yaInicio = !estaCancelado && eventoYaInicio(evento.fechaInicio);
     const textoEstado = estaCancelado ? 'Cancelado' : yaInicio ? 'Finalizado' : 'Publicado';
     const colorEstado = estaCancelado || yaInicio ? theme.textSecondary : theme.success;
     const ocupados =
