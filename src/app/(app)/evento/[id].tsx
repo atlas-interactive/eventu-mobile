@@ -18,6 +18,7 @@ import { terminoElDia, yaInicio } from '@/features/eventos/evento-fechas';
 import { obtenerEvento } from '@/features/eventos/services/evento-service';
 import { ConfirmarCancelacionInscripcion } from '@/features/inscripciones/components/confirmar-cancelacion-inscripcion';
 import { EntradaQr } from '@/features/inscripciones/components/entrada-qr';
+import { useCertificado } from '@/hooks/certificados/use-certificado';
 import { useInscripcionEvento } from '@/hooks/eventos/use-inscripcion-evento';
 import { useTheme } from '@/hooks/use-theme';
 import type { Evento } from '@/types/evento';
@@ -52,6 +53,7 @@ export default function DetalleEvento() {
     const [entradaAbierta, setEntradaAbierta] = useState(false);
     const { usuario } = useAuth();
     const inscripcion = useInscripcionEvento(idEvento, idValido);
+    const certificado = useCertificado(idEvento);
 
     useEffect(() => {
         if (!idValido) return;
@@ -95,6 +97,7 @@ export default function DetalleEvento() {
     const cancelado = evento?.estado.toUpperCase() === 'CANCELADO';
     const finalizado = !cancelado && !!evento && yaInicio(evento.fechaInicio);
     const entradaVencida = !!evento && terminoElDia(evento.fechaInicio);
+    const conCertificado = inscripcion.yaInscrito && finalizado && !!evento?.certificable;
     const agotado = !!evento && evento.cuposDisponibles <= 0;
     const esPropio = evento?.organizadorId === usuario?.usuarioId;
     const fechaInicio = evento ? new Date(evento.fechaInicio) : null;
@@ -339,33 +342,62 @@ export default function DetalleEvento() {
                             </ThemedText>
                         </Pressable>
                     ) : inscripcion.yaInscrito ? (
-                        <View style={styles.filaBarra}>
-                            <View style={styles.inscrito}>
-                                <SymbolView
-                                    name={{ ios: 'checkmark.circle', android: 'check_circle', web: 'check_circle' }}
-                                    size={18}
-                                    tintColor={theme.success}
-                                />
-                                <ThemedText type="smallBold" themeColor="success">
-                                    Estás inscrito
-                                </ThemedText>
-                            </View>
-                            {!entradaVencida && (
-                                <Pressable
-                                    accessibilityRole="button"
-                                    onPress={() => setEntradaAbierta(true)}
-                                    style={[styles.verEntrada, { backgroundColor: theme.text }]}>
+                        <>
+                            <View style={styles.filaBarra}>
+                                <View style={styles.inscrito}>
                                     <SymbolView
-                                        name={{ ios: 'qrcode', android: 'qr_code_2', web: 'qr_code_2' }}
-                                        size={16}
-                                        tintColor={theme.surface}
+                                        name={{ ios: 'checkmark.circle', android: 'check_circle', web: 'check_circle' }}
+                                        size={18}
+                                        tintColor={theme.success}
                                     />
-                                    <ThemedText type="smallBold" style={{ color: theme.surface }}>
-                                        Ver mi entrada
+                                    <ThemedText type="smallBold" themeColor="success">
+                                        Estás inscrito
                                     </ThemedText>
-                                </Pressable>
+                                </View>
+                                {!entradaVencida && (
+                                    <Pressable
+                                        accessibilityRole="button"
+                                        onPress={() => setEntradaAbierta(true)}
+                                        style={[styles.verEntrada, { backgroundColor: theme.text }]}>
+                                        <SymbolView
+                                            name={{ ios: 'qrcode', android: 'qr_code_2', web: 'qr_code_2' }}
+                                            size={16}
+                                            tintColor={theme.surface}
+                                        />
+                                        <ThemedText type="smallBold" style={{ color: theme.surface }}>
+                                            Ver mi entrada
+                                        </ThemedText>
+                                    </Pressable>
+                                )}
+                            </View>
+                            {conCertificado && (
+                                <>
+                                    {!!certificado.aviso && (
+                                        <ThemedText
+                                            type="small"
+                                            themeColor={certificado.aviso.tipo === 'error' ? 'error' : 'textSecondary'}
+                                            accessibilityRole="alert">
+                                            {certificado.aviso.mensaje}
+                                        </ThemedText>
+                                    )}
+                                    <Pressable
+                                        accessibilityRole="button"
+                                        accessibilityState={{ disabled: certificado.descargando, busy: certificado.descargando }}
+                                        disabled={certificado.descargando}
+                                        onPress={certificado.descargar}
+                                        style={[
+                                            styles.boton,
+                                            { backgroundColor: certificado.descargando ? theme.disabledButton : theme.primary },
+                                        ]}>
+                                        <ThemedText
+                                            type="smallBold"
+                                            themeColor={certificado.descargando ? 'textSecondary' : 'onPrimary'}>
+                                            {certificado.descargando ? 'Descargando…' : 'Descargar certificado (PDF)'}
+                                        </ThemedText>
+                                    </Pressable>
+                                </>
                             )}
-                        </View>
+                        </>
                     ) : mensajeEstado ? (
                         <View style={[styles.boton, { backgroundColor: theme.disabledButton }]}>
                             <ThemedText type="smallBold" themeColor="textSecondary" style={styles.centrado}>
