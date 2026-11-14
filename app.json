@@ -46,6 +46,15 @@
           "cameraPermission": "EventU usa la cámara para escanear los códigos QR de entrada a los eventos.",
           "recordAudioAndroid": false
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
+        }
       ]
     ],
     "experiments": {
