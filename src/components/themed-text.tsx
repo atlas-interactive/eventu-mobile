@@ -1,7 +1,10 @@
-import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
+import { Platform, StyleSheet, Text, type TextProps, type TextStyle } from 'react-native';
 
 import { Fonts, ThemeColor } from '@/constants/theme';
+import { useAccesibilidad, type TamanoLetra } from '@/context/accesibilidad-context';
 import { useTheme } from '@/hooks/use-theme';
+
+const ESCALA_LETRA: Record<TamanoLetra, number> = { pequena: 0.9, normal: 1, grande: 1.2 };
 
 export type ThemedTextProps = TextProps & {
     type?: 'default' | 'title' | 'small' | 'smallBold' | 'subtitle' | 'link' | 'linkPrimary' | 'code';
@@ -10,24 +13,33 @@ export type ThemedTextProps = TextProps & {
 
 export function ThemedText({ style, type = 'default', themeColor, ...rest }: ThemedTextProps) {
     const theme = useTheme();
+    const { tamanoLetra } = useAccesibilidad();
+    const escala = ESCALA_LETRA[tamanoLetra];
 
-    return (
-        <Text
-            style={[
-                { color: theme[themeColor ?? 'text'] },
-                type === 'default' && styles.default,
-                type === 'title' && styles.title,
-                type === 'small' && styles.small,
-                type === 'smallBold' && styles.smallBold,
-                type === 'subtitle' && styles.subtitle,
-                type === 'link' && styles.link,
-                type === 'linkPrimary' && [styles.linkPrimary, { color: theme.link }],
-                type === 'code' && styles.code,
-                style,
-            ]}
-            {...rest}
-        />
-    );
+    const estilo = (StyleSheet.flatten([
+        { color: theme[themeColor ?? 'text'] },
+        type === 'default' && styles.default,
+        type === 'title' && styles.title,
+        type === 'small' && styles.small,
+        type === 'smallBold' && styles.smallBold,
+        type === 'subtitle' && styles.subtitle,
+        type === 'link' && styles.link,
+        type === 'linkPrimary' && [styles.linkPrimary, { color: theme.link }],
+        type === 'code' && styles.code,
+        style,
+    ]) ?? {}) as TextStyle;
+
+    // El tamaño de letra elegido en accesibilidad escala el texto y su interlineado
+    const estiloFinal =
+        escala === 1
+            ? estilo
+            : {
+                  ...estilo,
+                  fontSize: estilo.fontSize ? estilo.fontSize * escala : estilo.fontSize,
+                  lineHeight: estilo.lineHeight ? estilo.lineHeight * escala : estilo.lineHeight,
+              };
+
+    return <Text style={estiloFinal} {...rest} />;
 }
 
 const styles = StyleSheet.create({

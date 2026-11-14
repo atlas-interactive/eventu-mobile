@@ -72,6 +72,57 @@ export const Colors = {
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
+type AjustePaleta = Record<'light' | 'dark', Partial<Record<ThemeColor, string>>>;
+
+// Textos y bordes más marcados para el modo de alto contraste
+export const AltoContraste: AjustePaleta = {
+    light: {
+        text: '#000000',
+        background: '#ffffff',
+        textSecondary: '#2b2b29',
+        primary: '#8c0f18',
+        link: '#8c0f18',
+        error: '#8a1010',
+        success: '#0b5a26',
+        border: '#5c5c58',
+        fieldBorder: '#000000',
+        category: '#0f172a',
+        certificado: '#6b2e05',
+        agotado: '#6b3604',
+    },
+    dark: {
+        text: '#ffffff',
+        background: '#000000',
+        surface: '#0d0d0c',
+        textSecondary: '#e4e4e0',
+        primary: '#e5484d',
+        link: '#ff8a8a',
+        error: '#ff9b9b',
+        success: '#7ef0a6',
+        border: '#a3a39f',
+        fieldBorder: '#ffffff',
+        category: '#f1f5f9',
+        certificado: '#fde68a',
+        agotado: '#fed7aa',
+    },
+};
+
+// Azul y naranja en lugar de verde y rojo para los estados, que se distinguen con daltonismo
+export const Daltonismo: AjustePaleta = {
+    light: {
+        success: '#0057b8',
+        successBackground: '#e8f1fb',
+        error: '#a35200',
+        errorBackground: '#fff4e6',
+    },
+    dark: {
+        success: '#6cb4ff',
+        successBackground: '#0b2545',
+        error: '#ffb066',
+        errorBackground: '#3b2106',
+    },
+};
+
 export const Fonts = Platform.select({
     ios: {
         sans: 'system-ui',
