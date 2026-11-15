@@ -285,6 +285,8 @@ export function CalendarioInscripciones({ inscripciones, onCancelar, scrollRef }
                                 {eventos.map((inscripcion) => {
                                     const fechaEvento = fechaDeInscripcion(inscripcion);
                                     const activa = inscripcion.estado === 'ACTIVA';
+                                    // Pasado el día del evento la inscripción queda como historial
+                                    const eventoFinalizado = activa && terminoElDia(inscripcion.eventoFechaInicio);
                                     return (
                                         <View
                                             key={inscripcion.id}
@@ -349,11 +351,15 @@ export function CalendarioInscripciones({ inscripciones, onCancelar, scrollRef }
                                                         type="smallBold"
                                                         style={[
                                                             styles.estado,
-                                                            activa
+                                                            activa && !eventoFinalizado
                                                                 ? { backgroundColor: theme.successBackground, color: theme.success }
                                                                 : { backgroundColor: theme.disabledButton, color: theme.textSecondary },
                                                         ]}>
-                                                        {activa ? 'Inscripción activa' : 'Inscripción cancelada'}
+                                                        {eventoFinalizado
+                                                            ? 'Evento finalizado'
+                                                            : activa
+                                                              ? 'Inscripción activa'
+                                                              : 'Inscripción cancelada'}
                                                     </ThemedText>
                                                     {activa && !!inscripcion.codigoQr && !terminoElDia(inscripcion.eventoFechaInicio) && (
                                                         <Pressable

@@ -14,7 +14,7 @@ import { IconoAviso } from '@/components/ui/icono-aviso';
 import { Skeleton, SkeletonEstado } from '@/components/ui/skeleton';
 import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
-import { terminoElDia, yaInicio } from '@/features/eventos/evento-fechas';
+import { estadoTemporal, terminoElDia, yaInicio } from '@/features/eventos/evento-fechas';
 import { obtenerEvento } from '@/features/eventos/services/evento-service';
 import { ConfirmarCancelacionInscripcion } from '@/features/inscripciones/components/confirmar-cancelacion-inscripcion';
 import { EntradaQr } from '@/features/inscripciones/components/entrada-qr';
@@ -95,16 +95,17 @@ export default function DetalleEvento() {
     };
 
     const cancelado = evento?.estado.toUpperCase() === 'CANCELADO';
-    const finalizado = !cancelado && !!evento && yaInicio(evento.fechaInicio);
+    const iniciado = !cancelado && !!evento && yaInicio(evento.fechaInicio);
     const entradaVencida = !!evento && terminoElDia(evento.fechaInicio);
-    const conCertificado = inscripcion.yaInscrito && finalizado && !!evento?.certificable;
+    const momento = evento && !cancelado ? estadoTemporal(evento.fechaInicio) : null;
+    const conCertificado = inscripcion.yaInscrito && iniciado && !!evento?.certificable;
     const agotado = !!evento && evento.cuposDisponibles <= 0;
     const esPropio = evento?.organizadorId === usuario?.usuarioId;
     const fechaInicio = evento ? new Date(evento.fechaInicio) : null;
 
     let mensajeEstado = '';
     if (cancelado) mensajeEstado = 'Evento cancelado';
-    else if (finalizado) mensajeEstado = 'El evento ya inició; no es posible inscribirse.';
+    else if (iniciado) mensajeEstado = 'El evento ya inició; no es posible inscribirse.';
     else if (agotado) mensajeEstado = 'Cupos agotados';
     else if (evento && evento.estado.toUpperCase() !== 'PUBLICADO')
         mensajeEstado = 'No se permiten inscripciones en eventos que no estén publicados.';
@@ -244,14 +245,21 @@ export default function DetalleEvento() {
                                         Evento cancelado
                                     </ThemedText>
                                 )}
-                                {finalizado && (
+                                {momento === 'en-curso' && (
+                                    <ThemedText
+                                        type="small"
+                                        style={[styles.chip, { backgroundColor: theme.agotadoBackground, color: theme.agotado }]}>
+                                        En curso
+                                    </ThemedText>
+                                )}
+                                {momento === 'finalizado' && (
                                     <ThemedText
                                         type="small"
                                         style={[styles.chip, { backgroundColor: theme.disabledButton, color: theme.text }]}>
                                         Evento finalizado
                                     </ThemedText>
                                 )}
-                                {!cancelado && !finalizado && agotado && (
+                                {!cancelado && !iniciado && agotado && (
                                     <ThemedText
                                         type="small"
                                         style={[styles.chip, { backgroundColor: theme.agotadoBackground, color: theme.agotado }]}>
@@ -345,13 +353,17 @@ export default function DetalleEvento() {
                         <>
                             <View style={styles.filaBarra}>
                                 <View style={styles.inscrito}>
-                                    <SymbolView
-                                        name={{ ios: 'checkmark.circle', android: 'check_circle', web: 'check_circle' }}
-                                        size={18}
-                                        tintColor={theme.success}
-                                    />
-                                    <ThemedText type="smallBold" themeColor="success">
-                                        Estás inscrito
+                                    {momento !== 'finalizado' && (
+                                        <SymbolView
+                                            name={{ ios: 'checkmark.circle', android: 'check_circle', web: 'check_circle' }}
+                                            size={18}
+                                            tintColor={theme.success}
+                                        />
+                                    )}
+                                    <ThemedText
+                                        type="smallBold"
+                                        themeColor={momento === 'finalizado' ? 'textSecondary' : 'success'}>
+                                        {momento === 'finalizado' ? 'Evento finalizado' : 'Estás inscrito'}
                                     </ThemedText>
                                 </View>
                                 {!entradaVencida && (
@@ -427,7 +439,7 @@ export default function DetalleEvento() {
                     inscripcion={inscripcion.inscripcionActiva}
                     onCerrar={() => setEntradaAbierta(false)}
                     onCancelar={
-                        finalizado
+                        iniciado
                             ? undefined
                             : () => {
                                   setEntradaAbierta(false);
