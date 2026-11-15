@@ -11,6 +11,7 @@ import { IconoAviso } from '@/components/ui/icono-aviso';
 import { Skeleton, SkeletonEstado } from '@/components/ui/skeleton';
 import { EspacioFinalPestanas, Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
+import { Accesibilidad } from '@/features/perfil/components/accesibilidad';
 import { CambiarContrasena } from '@/features/perfil/components/cambiar-contrasena';
 import { DesactivarCuenta } from '@/features/perfil/components/desactivar-cuenta';
 import { actualizarPerfil, obtenerPerfil } from '@/features/perfil/services/perfil-service';
@@ -290,6 +291,7 @@ export default function Perfil() {
                     )}
 
                     {perfil && !cargando && <CambiarContrasena onMensajeExito={setMensajeExito} />}
+                    {!cargando && <Accesibilidad />}
                     {perfil && !cargando && <DesactivarCuenta />}
                 </ScrollView>
             </KeyboardAvoidingView>

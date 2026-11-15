@@ -8,6 +8,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { AccesibilidadProvider } from '@/context/accesibilidad-context';
 import { AuthProvider, useAuth } from '@/context/auth-context';
 
 // Mantiene el splash nativo hasta saber si hay una sesión guardada
@@ -21,11 +22,13 @@ export default function RootLayout() {
     if (!fontsLoaded) return null;
 
     return (
-        <AuthProvider>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <NavegacionRaiz />
-            </ThemeProvider>
-        </AuthProvider>
+        <AccesibilidadProvider>
+            <AuthProvider>
+                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                    <NavegacionRaiz />
+                </ThemeProvider>
+            </AuthProvider>
+        </AccesibilidadProvider>
     );
 }
 

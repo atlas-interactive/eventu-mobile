@@ -1,9 +1,11 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type ComponentRef } from 'react';
 import {
     ActivityIndicator,
+    Keyboard,
+    KeyboardAvoidingView,
     Linking,
     Pressable,
     ScrollView,
@@ -33,6 +35,7 @@ export default function EscanearEntrada() {
     const [codigoManual, setCodigoManual] = useState('');
     const [permiso, pedirPermiso] = useCameraPermissions();
     const { procesando, resultado, registrar } = useRegistroAsistencia();
+    const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
 
     useEffect(() => {
         if (!idValido) return;
@@ -54,6 +57,8 @@ export default function EscanearEntrada() {
 
     const validarManual = async () => {
         if (!codigoManual.trim()) return;
+        // Se cierra el teclado para que el resultado quede a la vista
+        Keyboard.dismiss();
         await registrar(codigoManual, true);
         setCodigoManual('');
     };
@@ -72,173 +77,180 @@ export default function EscanearEntrada() {
                     Organizador
                 </ThemedText>
             </EncabezadoApp>
-            <ScrollView
-                contentInsetAdjustmentBehavior="automatic"
-                keyboardShouldPersistTaps="handled"
-                contentContainerStyle={styles.contenido}>
-                <Pressable accessibilityRole="link" hitSlop={12} onPress={volver} style={styles.volver}>
-                    <SymbolView
-                        name={{ ios: 'chevron.left', android: 'chevron_left', web: 'chevron_left' }}
-                        size={18}
-                        tintColor={theme.primary}
-                    />
-                    <ThemedText type="smallBold" themeColor="primary" style={styles.textoVolver}>
-                        Volver a inscritos
-                    </ThemedText>
-                </Pressable>
-
-                {!idValido && (
-                    <ThemedText type="small" themeColor="textSecondary">
-                        No se encontró el evento solicitado.
-                    </ThemedText>
-                )}
-
-                {!!error && (
-                    <ThemedText type="small" themeColor="error" accessibilityRole="alert">
-                        {error}
-                    </ThemedText>
-                )}
-
-                {!!evento && (
-                    <ThemedText type="smallBold" themeColor="textSecondary" style={styles.nombreEvento}>
-                        {evento.titulo.toUpperCase()}
-                    </ThemedText>
-                )}
-
-                <View style={styles.camara}>
-                    {permiso?.granted ? (
-                        <CameraView
-                            style={StyleSheet.absoluteFill}
-                            facing="back"
-                            barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-                            onBarcodeScanned={procesando ? undefined : ({ data }) => registrar(data)}
+        <KeyboardAvoidingView style={styles.flex} behavior="padding">
+                <ScrollView
+                ref={scrollRef}
+                    contentInsetAdjustmentBehavior="automatic"
+                    keyboardShouldPersistTaps="handled"
+                    contentContainerStyle={styles.contenido}>
+                    <Pressable accessibilityRole="link" hitSlop={12} onPress={volver} style={styles.volver}>
+                        <SymbolView
+                            name={{ ios: 'chevron.left', android: 'chevron_left', web: 'chevron_left' }}
+                            size={18}
+                            tintColor={theme.primary}
                         />
-                    ) : (
-                        !!permiso && (
-                            <View style={styles.sinPermiso}>
-                                <ThemedText type="small" style={styles.textoClaro}>
-                                    {permiso.canAskAgain
-                                        ? 'Para escanear, EventU necesita usar la cámara.'
-                                        : 'El permiso de la cámara está desactivado. Actívalo en los ajustes del celular para escanear.'}
-                                </ThemedText>
-                                <Pressable
-                                    accessibilityRole="button"
-                                    onPress={() => (permiso.canAskAgain ? pedirPermiso() : Linking.openSettings())}
-                                    style={[styles.botonPermiso, { backgroundColor: theme.primary }]}>
-                                    <ThemedText type="smallBold" themeColor="onPrimary">
-                                        {permiso.canAskAgain ? 'Permitir cámara' : 'Abrir ajustes'}
-                                    </ThemedText>
-                                </Pressable>
-                            </View>
-                        )
-                    )}
-
-                    {/* Guías de las esquinas */}
-                    <View pointerEvents="none" style={styles.guias}>
-                        <View style={[styles.esquina, styles.arribaIzquierda]} />
-                        <View style={[styles.esquina, styles.arribaDerecha]} />
-                        <View style={[styles.esquina, styles.abajoIzquierda]} />
-                        <View style={[styles.esquina, styles.abajoDerecha]} />
-                    </View>
-
-                    {procesando && (
-                        <View style={[styles.validando, { backgroundColor: theme.overlay }]}>
-                            <ActivityIndicator color="#ffffff" />
-                            <ThemedText type="smallBold" style={styles.textoClaro}>
-                                Validando…
-                            </ThemedText>
-                        </View>
-                    )}
-                </View>
-
-                <ThemedText type="small" themeColor="textSecondary" style={styles.centrado}>
-                    Apunta la cámara al código QR
-                </ThemedText>
-
-                <ThemedText type="small" themeColor="textSecondary" style={styles.centrado}>
-                    o escribe el código
-                </ThemedText>
-                <View style={styles.filaManual}>
-                    <TextInput
-                        accessibilityLabel="Código de la entrada"
-                        style={[
-                            styles.input,
-                            { borderColor: theme.fieldBorder, backgroundColor: theme.surface, color: theme.text },
-                        ]}
-                        placeholder="EVENTU-QR-..."
-                        placeholderTextColor={theme.textSecondary}
-                        value={codigoManual}
-                        onChangeText={setCodigoManual}
-                        autoCapitalize="characters"
-                        autoCorrect={false}
-                        returnKeyType="done"
-                        onSubmitEditing={validarManual}
-                    />
-                    <Pressable
-                        accessibilityRole="button"
-                        disabled={procesando || !codigoManual.trim()}
-                        onPress={validarManual}
-                        style={[
-                            styles.botonValidar,
-                            { backgroundColor: theme.text },
-                            (procesando || !codigoManual.trim()) && styles.deshabilitado,
-                        ]}>
-                        <ThemedText type="smallBold" style={{ color: theme.background }}>
-                            Validar
+                        <ThemedText type="smallBold" themeColor="primary" style={styles.textoVolver}>
+                            Volver a inscritos
                         </ThemedText>
                     </Pressable>
-                </View>
 
-                {resultado?.tipo === 'exito' && (
-                    <View
-                        accessibilityRole="alert"
-                        style={[styles.resultado, { backgroundColor: theme.successBackground, borderColor: theme.success }]}>
-                        <SymbolView
-                            name={{ ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }}
-                            size={28}
-                            tintColor={theme.success}
-                        />
-                        <View style={styles.flex}>
-                            <ThemedText type="smallBold" themeColor="success">
-                                Asistencia registrada
-                            </ThemedText>
-                            <ThemedText type="smallBold">{resultado.usuario}</ThemedText>
-                            <ThemedText type="small" themeColor="textSecondary" style={styles.textoChico}>
-                                Evento: {resultado.evento}
-                                {resultado.hora ? ` · ${resultado.hora}` : ''}
-                            </ThemedText>
+                    {!idValido && (
+                        <ThemedText type="small" themeColor="textSecondary">
+                            No se encontró el evento solicitado.
+                        </ThemedText>
+                    )}
+
+                    {!!error && (
+                        <ThemedText type="small" themeColor="error" accessibilityRole="alert">
+                            {error}
+                        </ThemedText>
+                    )}
+
+                    {!!evento && (
+                        <ThemedText type="smallBold" themeColor="textSecondary" style={styles.nombreEvento}>
+                            {evento.titulo.toUpperCase()}
+                        </ThemedText>
+                    )}
+
+                    <View style={styles.camara}>
+                        {permiso?.granted ? (
+                            <CameraView
+                                style={StyleSheet.absoluteFill}
+                                facing="back"
+                                barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
+                                onBarcodeScanned={procesando ? undefined : ({ data }) => registrar(data)}
+                            />
+                        ) : (
+                            !!permiso && (
+                                <View style={styles.sinPermiso}>
+                                    <ThemedText type="small" style={styles.textoClaro}>
+                                        {permiso.canAskAgain
+                                            ? 'Para escanear, EventU necesita usar la cámara.'
+                                            : 'El permiso de la cámara está desactivado. Actívalo en los ajustes del celular para escanear.'}
+                                    </ThemedText>
+                                    <Pressable
+                                        accessibilityRole="button"
+                                        onPress={() => (permiso.canAskAgain ? pedirPermiso() : Linking.openSettings())}
+                                        style={[styles.botonPermiso, { backgroundColor: theme.primary }]}>
+                                        <ThemedText type="smallBold" themeColor="onPrimary">
+                                            {permiso.canAskAgain ? 'Permitir cámara' : 'Abrir ajustes'}
+                                        </ThemedText>
+                                    </Pressable>
+                                </View>
+                            )
+                        )}
+
+                        {/* Guías de las esquinas */}
+                        <View pointerEvents="none" style={styles.guias}>
+                            <View style={[styles.esquina, styles.arribaIzquierda]} />
+                            <View style={[styles.esquina, styles.arribaDerecha]} />
+                            <View style={[styles.esquina, styles.abajoIzquierda]} />
+                            <View style={[styles.esquina, styles.abajoDerecha]} />
                         </View>
-                    </View>
-                )}
 
-                {!!otroEvento && (
-                    <ThemedText
-                        type="small"
-                        style={[styles.aviso, { backgroundColor: theme.agotadoBackground, color: theme.agotado }]}>
-                        Este código corresponde a otro de tus eventos: {otroEvento}.
+                        {procesando && (
+                            <View style={[styles.validando, { backgroundColor: theme.overlay }]}>
+                                <ActivityIndicator color="#ffffff" />
+                                <ThemedText type="smallBold" style={styles.textoClaro}>
+                                    Validando…
+                                </ThemedText>
+                            </View>
+                        )}
+                    </View>
+
+                    <ThemedText type="small" themeColor="textSecondary" style={styles.centrado}>
+                        Apunta la cámara al código QR
                     </ThemedText>
-                )}
 
-                {resultado?.tipo === 'error' && (
-                    <View
-                        accessibilityRole="alert"
-                        style={[styles.resultado, { backgroundColor: theme.errorBackground, borderColor: theme.error }]}>
-                        <SymbolView
-                            name={{ ios: 'xmark.circle.fill', android: 'cancel', web: 'cancel' }}
-                            size={28}
-                            tintColor={theme.error}
+                    <ThemedText type="small" themeColor="textSecondary" style={styles.centrado}>
+                        o escribe el código
+                    </ThemedText>
+                    <View style={styles.filaManual}>
+                        <TextInput
+                            accessibilityLabel="Código de la entrada"
+                            style={[
+                                styles.input,
+                                { borderColor: theme.fieldBorder, backgroundColor: theme.surface, color: theme.text },
+                            ]}
+                            placeholder="EVENTU-QR-..."
+                            placeholderTextColor={theme.textSecondary}
+                            value={codigoManual}
+                            onChangeText={setCodigoManual}
+                            autoCapitalize="characters"
+                            autoCorrect={false}
+                            returnKeyType="done"
+                            onSubmitEditing={validarManual}
+                            onFocus={() => {
+                                // Espera a que el teclado termine de abrir para bajar hasta el campo
+                                setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 300);
+                            }}
                         />
-                        <View style={styles.flex}>
-                            <ThemedText type="smallBold" themeColor="error">
-                                {resultado.titulo}
+                        <Pressable
+                            accessibilityRole="button"
+                            disabled={procesando || !codigoManual.trim()}
+                            onPress={validarManual}
+                            style={[
+                                styles.botonValidar,
+                                { backgroundColor: theme.text },
+                                (procesando || !codigoManual.trim()) && styles.deshabilitado,
+                            ]}>
+                            <ThemedText type="smallBold" style={{ color: theme.background }}>
+                                Validar
                             </ThemedText>
-                            <ThemedText type="small" themeColor="textSecondary" style={styles.textoChico}>
-                                {resultado.mensaje}
-                            </ThemedText>
-                        </View>
+                        </Pressable>
                     </View>
-                )}
-            </ScrollView>
+
+                    {resultado?.tipo === 'exito' && (
+                        <View
+                            accessibilityRole="alert"
+                            style={[styles.resultado, { backgroundColor: theme.successBackground, borderColor: theme.success }]}>
+                            <SymbolView
+                                name={{ ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }}
+                                size={28}
+                                tintColor={theme.success}
+                            />
+                            <View style={styles.flex}>
+                                <ThemedText type="smallBold" themeColor="success">
+                                    Asistencia registrada
+                                </ThemedText>
+                                <ThemedText type="smallBold">{resultado.usuario}</ThemedText>
+                                <ThemedText type="small" themeColor="textSecondary" style={styles.textoChico}>
+                                    Evento: {resultado.evento}
+                                    {resultado.hora ? ` · ${resultado.hora}` : ''}
+                                </ThemedText>
+                            </View>
+                        </View>
+                    )}
+
+                    {!!otroEvento && (
+                        <ThemedText
+                            type="small"
+                            style={[styles.aviso, { backgroundColor: theme.agotadoBackground, color: theme.agotado }]}>
+                            Este código corresponde a otro de tus eventos: {otroEvento}.
+                        </ThemedText>
+                    )}
+
+                    {resultado?.tipo === 'error' && (
+                        <View
+                            accessibilityRole="alert"
+                            style={[styles.resultado, { backgroundColor: theme.errorBackground, borderColor: theme.error }]}>
+                            <SymbolView
+                                name={{ ios: 'xmark.circle.fill', android: 'cancel', web: 'cancel' }}
+                                size={28}
+                                tintColor={theme.error}
+                            />
+                            <View style={styles.flex}>
+                                <ThemedText type="smallBold" themeColor="error">
+                                    {resultado.titulo}
+                                </ThemedText>
+                                <ThemedText type="small" themeColor="textSecondary" style={styles.textoChico}>
+                                    {resultado.mensaje}
+                                </ThemedText>
+                            </View>
+                        </View>
+                    )}
+                </ScrollView>
+        </KeyboardAvoidingView>
         </ThemedView>
     );
 }
